@@ -11,9 +11,9 @@ Como esto es un apunte informal no habrá links o referencias de bibliografia, p
 Se verán estructuras de datos y algoritmos usando C++.
 
 ## Índice
-1. [Memoria](#memoria)
-2. [Punteros](#punteros)
-3. [Estructuras y Clases](#estructuras-y-clases)
+1. [Memoria](#1-memoria)
+2. [Punteros](#2-punteros)
+3. [Estructuras y Clases](#3-estructuras-y-clases)
 
 ## Introducción.
 
@@ -29,7 +29,7 @@ En base a esto último, es que comprender qué es la memoria y a que se hace ref
 
 ---
 
-## 1. Memoria {#memoria}
+## 1. Memoria
 
 La memoria en C++ se organiza como un conjunto de celdas, típicamente de tamaño 1 byte, cada una con una dirección asociada que permite acceder a su ubicación.  
 
@@ -106,7 +106,7 @@ Para poner un poco de contexto, si tenemos un programa con memory leaks y lo cor
 
 --- 
 
-## 2. Punteros {#punteros}
+## 2. Punteros
 
 Cuando hablamos de memoria dije que esta se organiza en celdas de 1 byte, que tienen una dirección y además pueden almacenar un valor (de 1 byte). Los punteros son esa dirección.
 
@@ -403,4 +403,4 @@ int main() {
 - Pasar props por **referencia** generalmente, con **punteros** cuando es memoria dinámica o hay que usar null.
 
 
-## 3. Estructuras y Clases {#estructuras-y-clases}
+## 3. Estructuras y Clases
