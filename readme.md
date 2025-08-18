@@ -11,8 +11,9 @@ Como esto es un apunte informal no habrá links o referencias de bibliografia, p
 Se verán estructuras de datos y algoritmos usando C++.
 
 ## Índice
-...
-
+1. [Memoria](#memoria)
+2. [Punteros](#punteros)
+3. [Estructuras y Clases](#estructuras-y-clases)
 
 ## Introducción.
 
@@ -28,7 +29,7 @@ En base a esto último, es que comprender qué es la memoria y a que se hace ref
 
 ---
 
-## 1. Memoria
+## 1. Memoria {#memoria}
 
 La memoria en C++ se organiza como un conjunto de celdas, típicamente de tamaño 1 byte, cada una con una dirección asociada que permite acceder a su ubicación.  
 
@@ -105,7 +106,7 @@ Para poner un poco de contexto, si tenemos un programa con memory leaks y lo cor
 
 --- 
 
-## Punteros
+## 2. Punteros {#punteros}
 
 Cuando hablamos de memoria dije que esta se organiza en celdas de 1 byte, que tienen una dirección y además pueden almacenar un valor (de 1 byte). Los punteros son esa dirección.
 
@@ -127,7 +128,7 @@ Aquí:
 
 ---
 
-### 1.1 Operadores
+### 2.1 Operadores
 
 | Operador | Símbolo | Significado |
 |----------|---------|-------------|
@@ -154,7 +155,7 @@ std::cout << ptr->x; // equivalente a (*ptr).x
 
 ---
 
-### 1.2. Aritmética de punteros
+### 2.2. Aritmética de punteros
 En C++ **sumar o restar enteros a un puntero** no suma bytes, sino posiciones de elementos del tipo al que apunta.
 
 Como cada puntero al inicializarse se dice a que tipo apunta, las operaciones se harán operando según los bytes de ese tipo.
@@ -205,7 +206,7 @@ Dirección   Valor
 
 ---
 
-### 1.3 Punteros y arreglos (importante)
+### 2.3 Punteros y arreglos (importante)
 - El **nombre de arreglo** es un puntero a su primer elemento.
 - Por eso `arr` y `&arr[0]` son equivalentes al usarlos como puntero.
 
@@ -216,7 +217,7 @@ int* p = arr; // p == &arr[0]
 
 ---
 
-### 1.4 CONST y punteros
+### 2.4 CONST y punteros
 
 #### Antes de eso, **¿Qué es const?**
 
@@ -253,7 +254,7 @@ public:
 ```
 ---
 
-### 1.5 Parámetros de funciones: punteros vs referencias
+### 2.5 Parámetros de funciones: punteros vs referencias
 
 En C++ hay **tres formas principales** de pasar parámetros a funciones:
 
@@ -332,11 +333,11 @@ int main() {
 | Puede cambiar de objetivo     | ✅ Sí (puede reasignarse) | ❌ No (fijo tras inicializar)    |
 | Más usado en                  | APIs C, arrays dinámicos | C++ moderno, parámetros por ref |
 
->`Ejercicio:` Al igual que en las clases, es útil implementar y ver la ejecución de 3 funciones `swap(a, b)` la cual tome 2 enteros y los cambie. Para esto probar con las 3 formas anteriores y ver como se mueve y cambia la memoria usando [python tutor]("https://pythontutor.com/cpp.html#mode=edit"), podrás correr codigo y ver como se agregar variables al Stack y Heap
+>`Ejercicio:` Al igual que en las clases, es útil implementar y ver la ejecución de 3 funciones `swap(a, b)` la cual tome 2 enteros y los cambie. Para esto probar con las 3 formas anteriores y ver como se mueve y cambia la memoria usando [python tutor](https://pythontutor.com/cpp.html#mode=edit), podrás correr codigo y ver como se agregar variables al Stack y Heap
 
 ---
 
-### 1.6 Pero... ¿Qué cambia entre puntero y referencia?
+### 2.6 Pero... ¿Qué cambia entre puntero y referencia?
 
 - Cuando pasamos por valor, se crea una copia en memoria (stack).
 - Cuando pasamos por puntero, lo que viaja es la dirección (un valor de 4 u 8 bytes según la arquitectura). El objeto real sigue en la memoria original.
@@ -383,14 +384,14 @@ int main() {
 
 ---
 
-### 1.7 Errores comunes y advertencias
+### 2.7 Errores comunes y advertencias
 - **Puntero colgante (dangling pointer):** usar un puntero después de liberar o perder su memoria.
 - **Desreferenciar punteros nulos:** siempre inicializar punteros y verificar que no sean `nullptr`.
 - **Moverse fuera de los límites** del arreglo: comportamiento indefinido.
 
 ---
 
-### 1.8 Mini resumen rápido
+### 2.8 Mini resumen rápido
 - Operadores y Artimetica:
     - `&` → dirección de.
     - `*` → desreferencia.
@@ -402,5 +403,4 @@ int main() {
 - Pasar props por **referencia** generalmente, con **punteros** cuando es memoria dinámica o hay que usar null.
 
 
-
-## Estructuras y Clases
+## 3. Estructuras y Clases {#estructuras-y-clases}
