@@ -7,9 +7,10 @@
 
 class Persona {
 public:
+    // constructores, default y con params
     Persona(): edad(0), nombre(std::string("")) {};
     Persona(int e, std::string n): edad(e), nombre(n) {};
-    void mostrar();
+    void mostrar(); // cabecera de metodo, implementacion en Persona.cpp
     void metodo();
 private:
     int edad;

@@ -15,15 +15,16 @@ struct PersonaConst {
     int edad;
     std::string nombre;
 
-    PersonaConst() = delete;
-    PersonaConst(const std::string& n) {
+    // existe otros contructores x defecto: constructor copia, movimiento y destructor
+    PersonaConst() = delete; // elimino constructor default
+    PersonaConst(const std::string& n) { // paso string por referencia para evitar copias del string (arr de char)
         edad = 0;
         nombre = n;
     };
-    PersonaConst(int e, std::string n) : edad(e), nombre(n) {};
+    PersonaConst(int e, std::string n) : edad(e), nombre(n) {}; // sintaxis simplificada
 
-    PersonaConst(const PersonaConst&) = delete;
-    PersonaConst& operator=(const PersonaConst&) = delete;
+    PersonaConst(const PersonaConst&) = delete; // elimino constructor de copia
+    PersonaConst& operator=(const PersonaConst&) = delete; // elimino constructor para el operador "=" (sobrecarga de operadores)
 };
 
 
@@ -52,6 +53,7 @@ int main() {
     // PersonaConst pc;
     PersonaConst pc = PersonaConst(11, "hola");
     PersonaConst pc1 = PersonaConst("hola");
+    // no puedo usar las siguientes lineas por que como elimine los constructores voy a tener error
     // PersonaConst pc3;
     // pc = pc1;
     // PersonaConst pc2 = pc1;

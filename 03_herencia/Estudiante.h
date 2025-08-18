@@ -6,8 +6,10 @@
 #define HERENCIA_ESTUDIANTE_H
 #include "Persona.h"
 
+// heredo campos publicos de persona
 class Estudiante : public Persona {
 public:
+    // constructor, llama a constructor default de persona e inicializa la la matricula
     Estudiante (int m) : Persona() , matricula(m) {}
     void mostrarEstudiante ();
 private:
