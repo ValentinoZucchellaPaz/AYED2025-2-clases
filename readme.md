@@ -6,16 +6,36 @@
 **Carrera**: Ing. en Computación.
 **Materia**: Algoritmos y Estructuras de Datos.
 
-Este documento es para estudio de la materia, basado en mis notas (y la ayuda de ChatGPT y navegador para investigar y sacarme dudas).
-Como esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
 Se verán estructuras de datos y algoritmos usando C++.
+Este documento es para estudio de la materia, basado en mis notas en conjunto con la ayuda de ChatGPT y web para investigar y sacarme dudas.
+Como esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
+
+**Si encontrás un error en conceptos o código o simplemente quieras dejar tu feedback, no dudes en hablarme [vzucchellapaz@mi.unc.edu.ar](mailto::vzucchellapaz@mi.unc.edu.ar)**
 
 ---
 
 ## Índice
 1. [Memoria](#1-memoria)
+    1. [Python Tutor](#python-tutor)
+    2. [Tipos](#tipos)
+    3. [Comparación](#comparación)
+    4. [Casos de uso](#casos-de-uso)
+    5. [Memory Leaks](#memory-leaks)
+    6. [Static](#static)
 2. [Punteros](#2-punteros)
+    1. [Operadores](#21-operadores)
+    2. [Aritmetica de punteros](#22-aritmética-de-punteros)
+    3. [Punteros y Arreglos](#23-punteros-y-arreglos-importante)
+    4. [Punteros vs Referencia](#25-punteros-vs-referencias)
+    5. [Resumen de unidad](#26-resumen-de-unidad)
 3. [Estructuras y Clases](#3-estructuras-y-clases)
+    1. [Bases](#31-bases)
+    2. [Inicialización](#32-inicialización)
+    3. [Constructores](#33-constructores)
+    4. [Sobrecarga de Operadores](#33-sobrecarga-de-operadores)
+    5. [Herencia](#34-herencia)
+    6. [Polimorfismo](#34-polimorfismo)
+    7. [Clases Abstractas (Interfaces)](#35-clases-abstractas-interfaces)
 
 ---
 
@@ -35,21 +55,29 @@ En base a esto último, es que comprender qué es la memoria y a que se hace ref
 
 ## 1. Memoria
 
-La memoria en C++ se organiza como un conjunto de celdas, típicamente de tamaño 1 byte, cada una con una dirección asociada que permite acceder a su ubicación.  
+La memoria en C++ se organiza como un conjunto de **celdas de 1 byte, cada una con una dirección asociada que permite acceder a su ubicación**. Todo el programa y la "memoria" de este se guarda en la *RAM*.
 
-Esta memoria se utiliza para almacenar los valores generados al ejecutar un programa, y el espacio necesario para almacenar un valor depende del tipo de dato; por ejemplo, un char ocupa 1 byte, un int 4 y un double 8.
+Esta memoria se utiliza para almacenar los valores y variables del programa, y el espacio necesario para almacenar un valor depende del tipo de dato; por ejemplo, un char ocupa 1 byte, un int 4 y un double 8.
 
-Todo esto sucede en la memoria *RAM*, que es la memoria de acceso aleatorio donde se almacenan temporalmente el programa y sus variables durante la ejecución, aquí estarán las variables y funciones del programa.
 El nombre de una variable actúa como una etiqueta que permite acceder a su ubicación en memoria sin conocer su dirección exacta.
 Los punteros, por otro lado, son variables que contienen la dirección de memoria misma.
 
-En C++, la memoria se organiza en diferentes bloques que determinan el tiempo de vida y el ámbito de las variables. Los principales tipos de memoria son la stack (pila) y el heap (montón).
-El **stack** se utiliza para almacenar variables locales y gestionar llamadas a funciones, con un tamaño limitado y una destrucción automática cuando se abandona el ámbito de una función. La gestiona automáticamente el sistema.
-En contraste, el **heap** proporciona memoria dinámica, cuyo tamaño está limitado únicamente por la cantidad de RAM disponible, y requiere una gestión explícita por parte del programador mediante operadores como `new` y `delete`. Además, esta reserva y liberación ocurre en tiempo de ejecución, lo que es esencial (y peligroso) cuando el tamaño de los datos no se conoce de antemano.
+### Python Tutor
+[Python Tutor](https://pythontutor.com/cpp.html#mode=edit) es una herramienta para ver la ejecución, el movimiento de las variables y punteros a través de la memoria a medida que se ejecuta el código.
+Pero esto tiene un problema, originalmente se hizo para Python y luego tuvo el soporte para C++, por lo que hay cosas que generan inconsistencias con lo que van a leer sobre la memoria.
+Aquí verán solo Stack y Heap, lo cual **esta bien para los fines del curso**. No tienen que saber como compila C++ para este curso, pero tampoco hace mal.
+En el futuro desarrollaré más sobre las diferencias y distintas diferencias de Python Tutor con la compilación real de C++.
 
-Además existe otro tipo de memoria, la **memoria estática**. Es similar que el stack pero con algunas diferencias:
-La memoria estática se refiere a objetos con duración estática, como variables globales o variables locales declaradas con static, que se crean antes de que el programa comience a ejecutarse y se destruyen al finalizar.
-Por otro lado, el stack almacena variables locales y gestiona las llamadas a funciones (con sus variables). Su gestión es automática: la memoria se asigna cuando una función es llamada y se libera cuando esta termina.
+### Tipos
+
+Se organiza en bloques que determinan el tiempo de vida y el ámbito de las variables. Los principales tipos de memoria son la stack (pila) y el heap (montón).
+
+- **Stack**: almacena variables locales y gestionar llamadas a funciones, con un tamaño limitado y una destrucción automática cuando se abandona el ámbito de una función. La *gestiona automáticamente el sistema*. Generalmente se almacenan las variables conjuntamente, una al lado de la otra.
+
+- **Heap**: memoria dinámica, cuyo tamaño está limitado únicamente por la cantidad de RAM disponible, y requiere una *gestión manual* (`new` y `delete`). Su reserva y liberación ocurre en tiempo de ejecución, lo que es esencial (y peligroso) cuando el tamaño de los datos no se conoce de antemano.
+
+- **Memoria estática (Data Segment)**. similar al stack pero en esta se guardan objetos con duración estática, como variables globales o variables locales declaradas con `static`, que se crean antes de que el programa comience a ejecutarse y se destruyen al finalizar.
+
 Aunque a veces se asocia erróneamente la memoria estática con el stack, en realidad las variables con duración automática (locales no estáticas) son las que residen en el stack.
 
 
@@ -68,7 +96,7 @@ Aunque a veces se asocia erróneamente la memoria estática con el stack, en rea
 
 ### Memory Leaks
 
-Se denomina así a cuando, se reserva (y o guarda) memoria dinamica (heap) pero no se libera cuando ya no se necesita más, osea que lo que grabe en esa memoria seguirá hasta que termine la ejecución del programa.
+Se denomina así cuando se reserva (y o guarda) memoria dinamica (heap) y no se libera cuando ya no se necesita, osea que lo que grabe en esa memoria seguirá hasta que termine la ejecución del programa.
 
 Esto puede deverse a muchos factores pero es escencial tenerlo en cuenta porque, como dije antes, C++ usa un manejo manual de la memoria. En Java o Python me puedo olvidar porque existe un Recolector de Basura que lo hace de forma automática, pero aquí debe ser manual.
 
@@ -77,7 +105,7 @@ Para poner un poco de contexto, si tenemos un programa con memory leaks y lo cor
 ### Static
 
 `static` puede usarse para declarar variables y funciones en el ámbito global, el ámbito de espacio de nombres y el ámbito de clase. También se pueden declarar variables estáticas en el ámbito local.
-Es un modificador de almacenamiento y su función depende de dónde y cómo se use.
+Es un modificador de almacenamiento y **su función depende de dónde y cómo se use**.
 
 *Duración estática significa que el objeto o la variable se asignan cuando se inicia el programa y se desasignan cuando finaliza el programa.*
 
@@ -448,12 +476,13 @@ Persona * p5 = new Persona(25, "Carlos");
 static Persona p6 (50, "Marta")
 ```
 #### Inicialización automática (stack allocation)
-- Se guarda en la pila (stack).
+- Se guarda en la stack (pila).
 - Se destruye automáticamente al salir del ámbito.
-- Muy eficiente porque la pila tiene gestión automática.
-- () → inicialización directa.
-- {} → inicialización uniforme (C++11+). Previene narrowing conversions (por ej., int x{3.14}; da error).
-- = → inicialización por copia (aunque es identica a directa en C++ moderno xq el compilador optimiza).
+- Muy eficiente porque el stack tiene gestión automática.
+- Sintaxis y diferencias:
+    - () → inicialización directa.
+    - {} → inicialización uniforme (C++11+). Previene narrowing conversions (por ej., int x{3.14}; da error).
+    - = → inicialización por copia (aunque es identica a directa en C++ moderno porque el compilador lo optimiza).
 
 #### Inicialización dinámica (heap allocation)
 Se usa `new` cuando se llama al constructor, tiene las siguientes caracteristicas:
@@ -483,7 +512,7 @@ Un constructor es una función miembro especial que se llama automáticamente cu
 - Se usa para inicializar datos miembros.
 
 
-Se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.
+*Se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.*
 
 ####  Tipos de constructores
 
@@ -574,11 +603,11 @@ int main() {
 
 ### 3.4 Herencia
 La herencia es un mecanismo de la Programación Orientada a Objetos (POO) que permite a una clase (clase hijo) reutilizar atributos y métodos de otra clase (clase padre).
-Esto favorece la reutilización de código y el diseño jerárquico.
+**Esto favorece la reutilización de código y el diseño jerárquico.**
 
-**Siempre tener en cuenta que se va a heredar lo público y protegido, los campos privados no pasarán a la clase hijo**
+*Siempre tener en cuenta que se va a heredar lo público y protegido, los campos privados no pasarán a la clase hijo*
 
-Resulta conveniente leer sobre los cuidados con los [destructores de clase padre](#-destrucción-virtual-importante)
+*Resulta conveniente leer sobre los cuidados con los [destructores de clase padre](#-destrucción-virtual-importante)*
 
 **Tipos de herencia:**
 - `public`: lo público en el padre sigue siendo público en el hijo (la más común).
@@ -636,14 +665,15 @@ public:
 El polimorfismo en tiempo de ejecución aparece cuando trabajamos con punteros o referencias a clases padre.
 
 Ejemplo intuitivo:
-- Tienes una clase padre Animal con un método hablar().
-- Varias clases hijas (Perro, Gato, etc.) sobrescriben ese método.
-- Si tienes un Animal* que apunta a un Perro, ¿qué hablar() debe llamar?
-👉 Aquí entra el despacho dinámico: la decisión se hace en tiempo de ejecución.
+- Tienes una clase padre `Animal` con un método `hablar()`.
+- Varias clases hijas (`Perro`, `Gato`, etc.) sobrescriben ese método.
+- Si tienes un puntero de tipo `Animal*` que apunta a un Perro, ¿qué `hablar()` debe llamar?
+👉 Aquí entra el despacho dinámico: la **decisión se hace en tiempo de ejecución**.
 
 Una **función virtual** es una función que se declara con la palabra clave `virtual` en la clase padre, y que puede ser sobrescrita en las clases hijas.
 
 >**Conceptos detrás del mecanismo (dato de color)**
+>
 >Cuando declaras una función como virtual:
 >1. El compilador genera una tabla de funciones virtuales (vtable) para la clase.
 >    - Esta tabla contiene punteros a las implementaciones de las funciones virtuales.
@@ -675,10 +705,12 @@ class Figura {
 public:
     virtual void dibujar() const = 0;   // método puro virtual
     virtual ~Figura() = default;        // destructor virtual para evitar fugas
+    // virtual ~Figura() { cout << "elimnando padre\n"; }
 };
 
 class Circulo : public Figura {
 public:
+    // ~Circulo() { cout << "eliminando hija\n"; }
     void dibujar() const override {
         cout << "Dibujando un círculo" << endl;
     }
@@ -701,10 +733,13 @@ int main() {
     }
 
     for (auto f : figuras) delete f; // liberar memoria
-    // como el destructor de padre es virtual se evitan memory leaks
-    // una memory leak sería sería eliminar la clase padre y no la hija
 }
 ```
+
+Como el destructor de padre es virtual se evitan memory leaks.
+Si no borrara los destructores con salida por cout, vería los dos eliminando padre e hijo.
+Pero si no pusiera el virtual tendría solo eliminando padre.
+Esto es una memory leak, se elimina la clase padre y no la hija
 
 ### 3.5 Clases Abstractas (Interfaces)
 
