@@ -10,10 +10,14 @@ Este documento es para estudio de la materia, basado en mis notas (y la ayuda de
 Como esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
 Se verán estructuras de datos y algoritmos usando C++.
 
+---
+
 ## Índice
 1. [Memoria](#1-memoria)
 2. [Punteros](#2-punteros)
 3. [Estructuras y Clases](#3-estructuras-y-clases)
+
+---
 
 ## Introducción.
 
@@ -37,72 +41,94 @@ Esta memoria se utiliza para almacenar los valores generados al ejecutar un prog
 
 Todo esto sucede en la memoria *RAM*, que es la memoria de acceso aleatorio donde se almacenan temporalmente el programa y sus variables durante la ejecución, aquí estarán las variables y funciones del programa.
 El nombre de una variable actúa como una etiqueta que permite acceder a su ubicación en memoria sin conocer su dirección exacta.
+Los punteros, por otro lado, son variables que contienen la dirección de memoria misma.
 
-En C++ (y en general en lenguajes de bajo nivel como C), la memoria donde se almacenan las variables y objetos puede dividirse en varias **áreas principales**: memoria **estática**, **dinámica**, **stack** (pila) y **heap** (montículo). Comprender estas diferencias es clave para escribir programas seguros y eficientes.
+En C++, la memoria se organiza en diferentes bloques que determinan el tiempo de vida y el ámbito de las variables. Los principales tipos de memoria son la stack (pila) y el heap (montón).
+El **stack** se utiliza para almacenar variables locales y gestionar llamadas a funciones, con un tamaño limitado y una destrucción automática cuando se abandona el ámbito de una función. La gestiona automáticamente el sistema.
+En contraste, el **heap** proporciona memoria dinámica, cuyo tamaño está limitado únicamente por la cantidad de RAM disponible, y requiere una gestión explícita por parte del programador mediante operadores como `new` y `delete`. Además, esta reserva y liberación ocurre en tiempo de ejecución, lo que es esencial (y peligroso) cuando el tamaño de los datos no se conoce de antemano.
 
----
+Además existe otro tipo de memoria, la **memoria estática**. Es similar que el stack pero con algunas diferencias:
+La memoria estática se refiere a objetos con duración estática, como variables globales o variables locales declaradas con static, que se crean antes de que el programa comience a ejecutarse y se destruyen al finalizar.
+Por otro lado, el stack almacena variables locales y gestiona las llamadas a funciones (con sus variables). Su gestión es automática: la memoria se asigna cuando una función es llamada y se libera cuando esta termina.
+Aunque a veces se asocia erróneamente la memoria estática con el stack, en realidad las variables con duración automática (locales no estáticas) son las que residen en el stack.
 
-### 1.1 Memoria Estática (spoiler, no es el Stack)
-- Se reserva en **tiempo de compilación**.
-- Incluye:
-    - **Variables globales**.
-    - **Variables `static`** dentro de funciones o clases.
-    - Constantes (`const` y `constexpr`).
-- Su espacio de memoria se mantiene durante **toda la ejecución del programa**.
 
-¿Qué? ¿Osea que **no se libera hasta que el programa finaliza**? Esto significa que:
-- Es ideal para valores que **deben persistir entre llamadas a funciones**.
-- Puede generar problemas si se usa excesivamente (alto consumo de memoria fija) → CUIDADO CON LOS STATIC.
-
----
-
-### 1.2 Memoria Automática (este sí es Stack)
-
-- Usada para variables locales dentro de funciones.
-- Se reserva en el stack frame al entrar en la función y se libera automáticamente al salir.
-- Muy rápida de asignar y liberar.
-- Limitada en tamaño (overflow si hay demasiadas variables locales o recursión profunda).
-- No requiere `delete` ni `free`.
-
----
-
-### 1.3 Memoria Dinámica (Heap)
-
-- Se reserva en tiempo de ejecución (runtime) usando `new` ó `malloc` (cuando se llega a la linea con esas instrucciones se reserva).
-- Permite crear estructuras de tamaño variable o que sobrevivan más allá del ámbito de la función.
-- Flexible, el tamaño puede decidirse en runtime.
-- Necesita liberación manual (`delete` o `delete[]`), si no → **memory leaks**.
-- Más lenta que la memoria de pila.
-- Usada para estructuras grandes (listas, árboles, vectores dinámicos, etc.).
-
-**Ejemplo**:
-```cpp
-int* ptr = new int(42);   // reserva en heap
-delete ptr;               // liberación manual
-```
-
----
-
-### 1.4 Comparación
+### Comparación
 | Tipo de Memoria | Momento de Asignación | Momento de Liberación | Ejemplo                      |
 | --------------- | --------------------- | --------------------- | ---------------------------- |
 | **Estática**    | Compilación           | Fin del programa      | Variables globales, `static` |
 | **Stack**       | Entrada a función     | Salida de función     | Variables locales            |
 | **Heap**        | Ejecución (`new`)     | Manual (`delete`)     | Objetos dinámicos            |
 
-### 1.5 Casos de Uso
+### Casos de Uso
 - Estática → contadores, configuraciones globales, valores que no cambian.
 - Stack → variables temporales, funciones recursivas, parámetros por valor.
 - Heap → estructuras de datos grandes o dinámicas, objetos que deben persistir entre funciones.
 
 
-### 1.6 Memory Leaks
+### Memory Leaks
 
 Se denomina así a cuando, se reserva (y o guarda) memoria dinamica (heap) pero no se libera cuando ya no se necesita más, osea que lo que grabe en esa memoria seguirá hasta que termine la ejecución del programa.
 
 Esto puede deverse a muchos factores pero es escencial tenerlo en cuenta porque, como dije antes, C++ usa un manejo manual de la memoria. En Java o Python me puedo olvidar porque existe un Recolector de Basura que lo hace de forma automática, pero aquí debe ser manual.
 
 Para poner un poco de contexto, si tenemos un programa con memory leaks y lo corremos en nuestra computadora no va a crashear, es raro incluso si usamos un programa muy grande. Pero imagina que se programa un microcontrolador (poca memoria) que mueve una antena en la punta del Cerro Uritorco, no va a ser conveniente ir hasta alla a resetearlo si crashea porque se quedó sin memoria.
+
+### Static
+
+`static` puede usarse para declarar variables y funciones en el ámbito global, el ámbito de espacio de nombres y el ámbito de clase. También se pueden declarar variables estáticas en el ámbito local.
+Es un modificador de almacenamiento y su función depende de dónde y cómo se use.
+
+*Duración estática significa que el objeto o la variable se asignan cuando se inicia el programa y se desasignan cuando finaliza el programa.*
+
+*Vinculación externa* significa que el nombre de la variable puede verse desde fuera del archivo en el que se declara la variable. A la inversa, la *vinculación interna* significa que el nombre no es visible fuera del archivo en el que se declara la variable.
+
+**Casos de uso**
+1. Variables locales (dentro de funciones)
+    - Se crea solo una vez, y su valor persiste entre llamadas sucesivas a la función (vive durante toda la exe del programa).
+    - No se destruye al salir del bloque, como ocurre con una variable normal.
+    - Ambito local, no es accesible de fuera de la función.
+```cpp
+void contador() {
+    static int x = 0; // se inicializa solo la primera vez
+    x++;
+    cout << "x vale: " << x << endl;
+}
+
+int main() {
+    contador(); // x = 1
+    contador(); // x = 2
+    contador(); // x = 3
+}
+```
+
+2. Variables globales
+    - Una variable global estática solo es visible en el archivo donde fue declarada (tiene linkage interno).
+    - Sirve para ocultar variables globales y evitar conflictos de nombres entre archivos. Por ejemplo si tengo `static int contador` en archivo1.cpp no puedo acceder desde otro archivo con `extern int contador`
+
+3. Miembros de clases
+    - Pertenece a la clase en sí, no a un objeto en particular. 👉 Significa que todos los objetos comparten ese mismo miembro.
+    - Pueden ser variables o funciones de la clase.
+
+```cpp
+class Persona {
+public:
+    static int poblacion;
+    static void imprimir() {
+        cout << "Soy una función estática" << endl;
+    }
+    Persona() { poblacion++; }
+};
+
+int Persona.poblacion = 0; // Definición fuera de la clase
+
+int main() {
+    Persona.imprimir(); // Llamo a f antes de inicializar
+    Persona p1, p2, p3;
+    cout << "Población: " << Persona::poblacion << endl; // 3
+
+}
+```
 
 --- 
 
@@ -126,7 +152,6 @@ Aquí:
 - `&x` → es la dirección en memoria de `x`.
 - `p` → es un puntero a `int` que guarda esa dirección.
 
----
 
 ### 2.1 Operadores
 
@@ -153,7 +178,6 @@ Punto* ptr = &pt; // o new Punto{...}
 std::cout << ptr->x; // equivalente a (*ptr).x
 ```
 
----
 
 ### 2.2. Aritmética de punteros
 En C++ **sumar o restar enteros a un puntero** no suma bytes, sino posiciones de elementos del tipo al que apunta.
@@ -177,7 +201,6 @@ std::cout << *p;     // 30
 ```
 va a retornar el valor de lo que hay 120 bytes más adelante en memoria (a partir del inicio de una clase).  
 
----
 
 #### Operaciones válidas:
 - `p + n` → puntero a la posición `n` elementos adelante.
@@ -185,26 +208,6 @@ va a retornar el valor de lo que hay 120 bytes más adelante en memoria (a parti
 - `p2 - p1` → número de elementos entre dos punteros (misma zona de memoria).
 - Comparaciones (`<`, `>`, `==`, etc.) → posibles si apuntan al mismo arreglo/bloque.
 
----
-
-#### Ejemplo visual de aritmética:
-Supongamos:
-```cpp
-int arr[3] = {5, 6, 7};
-int* p = arr;
-```
-
-Memoria (cada celda 4 bytes):
-```
-Dirección   Valor
-0x1000      5   <- p
-0x1004      6
-0x1008      7
-```
-- `p + 1` apunta a `0x1004`.
-- `*(p + 1)` → 6.
-
----
 
 ### 2.3 Punteros y arreglos (importante)
 - El **nombre de arreglo** es un puntero a su primer elemento.
@@ -215,7 +218,6 @@ int arr[3] = {1, 2, 3};
 int* p = arr; // p == &arr[0]
 ```
 
----
 
 ### 2.4 CONST y punteros
 
@@ -227,6 +229,8 @@ Sirve para:
 - Proteger datos de modificaciones.
 - Mejorar legibilidad (intención clara).
 - Optimización (el compilador puede hacer chequeos extra).
+
+**Ejemplos con casos de punteros**
 
 ```cpp
 const int a = 10;
@@ -252,11 +256,10 @@ public:
     }
 }
 ```
----
 
-### 2.5 Parámetros de funciones: punteros vs referencias
+### 2.5 Punteros vs referencias
 
-En C++ hay **tres formas principales** de pasar parámetros a funciones:
+En C++ hay tres formas principales de **pasar parámetros a funciones**:
 
 1. **Por valor** (copia del argumento)
 ```cpp
@@ -273,7 +276,7 @@ int main() {
 
 - Se crea una copia en memoria.
 - El valor original no se modifica.
-- Más seguro, pero puede ser costoso si el objeto es grande.
+- Más seguro, pero puede ser costoso si el objeto es grande (arrays).
 
 2. **Por puntero** ( * )
 ```cpp
@@ -287,8 +290,7 @@ int main() {
     // a ahora vale 10
 }
 ```
-- La función recibe una dirección de memoria.
-- Dentro de la función, al usar *x, accedemos al valor real.
+- La función recibe una dirección de memoria y se accede al valor real.
 - Hay que pasar &a explícitamente.
 - Permite que el parámetro sea nullptr (si no se valida, error seguro).
 - Se puede cambiar qué dirección apunta el puntero dentro de la función (pero eso no afecta al puntero original, porque el puntero mismo se pasa por valor).
@@ -306,6 +308,7 @@ int main() {
     // a sigue siendo 5, el puntero original no cambió
 }
 ```
+
 3. **Por referencia** (&)
 ```cpp
 void f(int& x) {
@@ -324,45 +327,8 @@ int main() {
 - Siempre es válido, nunca nullptr.
 - No se puede hacer que la referencia "apunte" a otra variable después de creada.
 
-#### Comparativa
-| Característica                | Puntero (`*`)            | Referencia (`&`)                |
-| ----------------------------- | ------------------------ | ------------------------------- |
-| Necesita `&` en llamada       | ✅ Sí                     | ❌ No                            |
-| Se usa `*` para acceder valor | ✅ Sí                     | ❌ No (se usa directo)           |
-| Puede ser `nullptr`           | ✅ Sí                     | ❌ No                            |
-| Puede cambiar de objetivo     | ✅ Sí (puede reasignarse) | ❌ No (fijo tras inicializar)    |
-| Más usado en                  | APIs C, arrays dinámicos | C++ moderno, parámetros por ref |
-
 >`Ejercicio:` Al igual que en las clases, es útil implementar y ver la ejecución de 3 funciones `swap(a, b)` la cual tome 2 enteros y los cambie. Para esto probar con las 3 formas anteriores y ver como se mueve y cambia la memoria usando [python tutor](https://pythontutor.com/cpp.html#mode=edit), podrás correr codigo y ver como se agregar variables al Stack y Heap
 
----
-
-### 2.6 Pero... ¿Qué cambia entre puntero y referencia?
-
-- Cuando pasamos por valor, se crea una copia en memoria (stack).
-- Cuando pasamos por puntero, lo que viaja es la dirección (un valor de 4 u 8 bytes según la arquitectura). El objeto real sigue en la memoria original.
-- Cuando pasamos por referencia, el compilador usualmente lo traduce a un puntero “oculto”, pero con sintaxis más amigable.
-
-Ejemplo ilustrado:
-```cpp
-void f(int& x) { x = 10; }  // referencia
-void g(int* x) { *x = 20; } // puntero
-
-int main() {
-    int a = 5;
-
-    f(a);  // mueve "referencia implícita" -> a = 10
-    g(&a); // mueve dirección explícita   -> a = 20
-}
-```
-
-#### Efecto en memoria (simplificado):
-
-| Variable   | Dirección     | Valor                |
-| ---------- | ------------- | -------------------- |
-| `a`        | 0x100         | 20                   |
-| `x` (en f) | alias → 0x100 | —                    |
-| `x` (en g) | 0x200 (stack) | 0x100 (apunta a `a`) |
 
 #### Cuándo usar cada uno
 
@@ -376,22 +342,13 @@ int main() {
 - Cuando necesitás que un parámetro pueda ser "nulo".
 - Cuando querés cambiar a qué objeto apunta (ej: función que reasigna).
 
-#### 👉 En resumen:
+#### Notas finales
 
-- Usa **referencias** para la mayoría de los casos en C++.
-- Usa **punteros** cuando tenés que trabajar con memoria dinámica o "opcionalidad" (null).
+- Cuando pasamos por valor, se crea una copia en memoria (stack).
+- Cuando pasamos por puntero, lo que viaja es la dirección (un valor de 4 u 8 bytes según la arquitectura). El objeto real sigue en la memoria original.
+- Cuando pasamos por referencia, el compilador usualmente lo traduce a un puntero “oculto”, pero con sintaxis más amigable.
 
-
----
-
-### 2.7 Errores comunes y advertencias
-- **Puntero colgante (dangling pointer):** usar un puntero después de liberar o perder su memoria.
-- **Desreferenciar punteros nulos:** siempre inicializar punteros y verificar que no sean `nullptr`.
-- **Moverse fuera de los límites** del arreglo: comportamiento indefinido.
-
----
-
-### 2.8 Mini resumen rápido
+### 2.6 Resumen de unidad
 - Operadores y Artimetica:
     - `&` → dirección de.
     - `*` → desreferencia.
@@ -399,8 +356,415 @@ int main() {
     - `p + n` → mueve el puntero `n` elementos (no bytes).
 - El **nombre del array** es equivalente puntero al primer elemento.
 - Siempre **inicializar** punteros (`nullptr` si no tienen valor aún).
-- **Const** evita que se re asigne esa var, util para punteros y funciones
-- Pasar props por **referencia** generalmente, con **punteros** cuando es memoria dinámica o hay que usar null.
+- **Const** evita que se re asigne esa var, útil para punteros y funciones
+- En funciones pasar props por **referencia** cuando se deba modificar dentro de f (evita copias de objeto), con **punteros** cuando es un array o hay que usar null. Por valor crea una copia.
 
+---
 
 ## 3. Estructuras y Clases
+
+Ya existe una materia que estudia a fondo la Programación Orientada a Objetos, pero debido a cambio de planes algunos no la tuvieron por lo que pueden estar confundidos con algunos conceptos. [Este es un blog interesante sobre POO](https://coderslink.com/talento/blog/que-es-la-programacion-orientada-a-objetos-poo-y-cuales-son-sus-principios-fundamentales/)
+
+### 3.1 Bases
+
+En programación orientada a objetos, una **clase** es un molde o
+plantilla que define cómo serán los objetos.  
+Dentro de una clase podemos tener:
+- **Atributos (datos/variables de instancia):** representan el estado del objeto.
+- **Métodos (funciones):** representan el comportamiento del objeto.
+
+Por otro lado, los **struct** son originarios de C y extendidos en C++ con comportamientos similares a clases, pero con una diferencia fundamental en los **modificadores de acceso**.
+Son **idénticos a las clases**, salvo que por defecto sus miembros son **públicos**.
+
+📌 **Puntos clave sobre las clases en C++:**
+- Permiten **encapsulamiento** (ocultar la implementación interna).
+- Pueden tener **constructores y destructores**.
+- Soportan **herencia** y **polimorfismo**.
+- Por defecto, los miembros de una clase son **privados**.
+- Por defecto, los miembros de una estructura son **públicos**.
+- Las estructuras se usan para **datos simples agrupados** o cuando no es necesario ocultar información. Mientras que las clases para **representar entidades lógicas completas**.
+
+
+#### Diferencias entre Clase y Struct en C++
+
+Aunque hoy en día se pueden usar casi igual, hay diferencias de estilo y semántica:
+
+| Característica          | `class`                                                              | `struct`                                                          |
+| ----------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Acceso por defecto**  | `private`                                                            | `public`                                                          |
+| **Encapsulación**       | Usada típicamente para OOP con atributos privados y métodos públicos | Usado más para agrupar datos simples                              |
+| **Estilo / Convención** | Representa **objetos complejos**, entidades con lógica               | Representa **datos livianos** o registros de datos                |
+| **Herencia**            | Privada por defecto                                                  | Pública por defecto                                               |
+| **Uso típico**          | Modelar entidades del dominio (ej: Usuario, Pedido, Cuenta)          | Modelar estructuras de datos (ej: Punto, Vector3D, Configuración) |
+
+
+#### Ejemplo Comparativo
+
+``` cpp
+class Coche { // definición no es instancia
+private: // Acceso restringido: solo se puede acceder desde dentro de la clase (encapsulamiento).
+    std::string marca;
+    int velocidad;
+
+public: // Acceso público: las instancias pueden llamar a lo que hay aquí dentro
+    // Constructor
+    Coche(std::string m, int v) : marca(m), velocidad(v) {}
+
+    // Método
+    void acelerar() {
+        velocidad += 10;
+        std::cout << marca << " va a " << velocidad << " km/h" << std::endl;
+    }
+};
+
+struct Coordenada {
+    int x;
+    int y;
+};
+```
+
+Para crear instancias (objetos) se inicializan usando el constructor:
+
+``` cpp
+Coche c1("Toyota", 100);
+c1.acelerar(); // Métodos, encapsulación
+
+Coordenada punto {5, 7};
+std::cout << "X: " << punto.x << ", Y: " << punto.y << std::endl; // Datos simples
+```
+
+### 3.2 Inicialización
+```cpp
+// stack allocation
+Persona p1;              // Llama al constructor por defecto
+Persona p2(20, "Juan");  // Llama al constructor con parámetros
+Persona p3{30, "Ana"};   // Inicialización con llaves (uniform initialization)
+Persona p4 = Persona(25, "Carlos"); // Inicialización por copia (equivalente a directa en C++ moderno)
+
+// heap allocation
+Persona * p5 = new Persona(25, "Carlos");
+
+// static allocation
+static Persona p6 (50, "Marta")
+```
+#### Inicialización automática (stack allocation)
+- Se guarda en la pila (stack).
+- Se destruye automáticamente al salir del ámbito.
+- Muy eficiente porque la pila tiene gestión automática.
+- () → inicialización directa.
+- {} → inicialización uniforme (C++11+). Previene narrowing conversions (por ej., int x{3.14}; da error).
+- = → inicialización por copia (aunque es identica a directa en C++ moderno xq el compilador optimiza).
+
+#### Inicialización dinámica (heap allocation)
+Se usa `new` cuando se llama al constructor, tiene las siguientes caracteristicas:
+- El objeto vive en el heap (montículo).
+- Devuelve un puntero (a su dirección en el heap)
+- No se destruye automáticamente → debes liberar con delete.
+
+#### Inicialización estática
+- Si es global o static, vive toda la ejecución del programa.
+- Solo se crea una vez, no se destruye al salir del ámbito.
+- Muy usado en singletons o constantes globales.
+
+#### Resumen
+| Forma                       | Dónde se guarda                    | Vida útil                  |
+| --------------------------- | ---------------------------------- | -------------------------- |
+| `Persona p;`                | **Stack**                          | Hasta que termina el scope |
+| `new Persona();`            | **Heap**                           | Hasta `delete`             |
+| `static Persona p;`         | **Data segment** (global estática) | Todo el programa           |
+| `Persona p = Persona(...);` | Stack (igual que directa)          | Scope                      |
+
+
+### 3.3 Constructores
+
+Un constructor es una función miembro especial que se llama automáticamente cuando se crea un objeto.
+- Tiene el mismo nombre que la clase/struct.
+- No tiene tipo de retorno (ni void).
+- Se usa para inicializar datos miembros.
+
+
+Se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.
+
+####  Tipos de constructores
+
+1. **Por defecto**
+Se invoca cuando no se pasan parámetros al crear un objeto.
+Si no lo definimos, C++ genera uno implícito (que inicializa los miembros con valores por defecto o indeterminados en tipos primitivos).
+2. **Parametrizado**
+Permite inicializar los miembros con valores específicos.
+3. **Copia**
+Se invoca cuando se crea un objeto a partir de otro del mismo tipo.
+Por defecto, C++ genera uno que copia miembro a miembro (shallow copy, los objetos anidados serán los mismos).
+**Ejemplo**
+```cpp
+struct Punto {
+    int x, y;
+    // Constructor Parametizado
+    Punto(int xVal, int yVal) : x(xVal), y(yVal) {}
+    // Constructor de copia (existe aunque no lo escriba)
+    Punto(const Punto& otro) : x(otro.x), y(otro.y) {}
+    // Constructor por defecto (existe aunque no lo escriba)
+    Punto() : x(0), y(0) {}
+};
+
+int main() {
+    Punto p1(5, 10);
+    Punto p2 = p1; // Copia los valores de p1
+}
+```
+4. **Movimiento**
+Se usa cuando el objeto se inicializa a partir de un temporal o un recurso que se puede "mover".
+Evita copias innecesarias, optimizando el rendimiento.
+**Ejemplo**
+```cpp
+struct Vector {
+    vector<int> datos; // <- tipo de c++, se hace #include <vector>
+
+    Vector(vector<int>&& v) : datos(move(v)) { // operador de copia (&&) y move es f de c++
+        cout << "Constructor de movimiento\n";
+    }
+};
+
+int main() {
+    Vector v(move(vector<int>{1, 2, 3})); // Se mueve el temporal
+}
+```
+
+### 3.3 Sobrecarga de operadores
+La sobrecarga de operadores permite redefinir el comportamiento de operadores como +, -, =, ==, etc.
+
+- Operadores que sí se pueden sobrecargar
+    - Aritméticos: +, -, *, /, %
+    - Relacionales: ==, !=, <, >, <=, >=
+    - Asignación: =, +=, -=, etc.
+    - Otros: [], (), ->, ++, --
+
+- Operadores que NO se pueden sobrecargar
+    - . (acceso a miembro)
+    - .* (puntero a miembro)
+    - :: (resolución de ámbito)
+    - sizeof
+    - typeid
+
+**Ejemplo de sobrecarga operador + y ==**
+```cpp
+struct Punto {
+    int x, y;
+    Punto(int xVal, int yVal) : x(xVal), y(yVal) {}
+
+    // Sobrecarga del operador +
+    Punto operator+(const Punto& otro) const {
+        return Punto(x + otro.x, y + otro.y);
+    }
+
+    // Sobrecarga del operador ==
+    bool operator==(const Punto& otro) const {
+        return (x == otro.x && y == otro.y);
+    }
+};
+
+int main() {
+    Punto p1(5, 10), p2(5, 10);
+    if (p1 == p2) cout << "Son iguales\n";
+    
+    Punto p3 = p1 + p2; // Usa la sobrecarga
+    cout << p3.x << ", " << p3.y << endl; // 10, 20
+}
+```
+
+### 3.4 Herencia
+La herencia es un mecanismo de la Programación Orientada a Objetos (POO) que permite a una clase (clase hijo) reutilizar atributos y métodos de otra clase (clase padre).
+Esto favorece la reutilización de código y el diseño jerárquico.
+
+**Siempre tener en cuenta que se va a heredar lo público y protegido, los campos privados no pasarán a la clase hijo**
+
+Resulta conveniente leer sobre los cuidados con los [destructores de clase padre](#-destrucción-virtual-importante)
+
+**Tipos de herencia:**
+- `public`: lo público en el padre sigue siendo público en el hijo (la más común).
+- `protected`: lo público/protegido en el padre pasa a ser protegido en el hijo.
+- `private`: lo público/protegido en el padre pasa a ser privado en el hijo.
+
+**Multiple**
+C++ permite herencia múltiple, esto es que una clase hijo herede de muchas clases padres, pudiendo generar estructuras lógicas mejor segregadas.
+
+Imagina un `Venteveo`, es un pájaro volador, pero si pongo un método `volar()` en la clase padre `Pajaro`, estaría haciendo voladores a pájaros que no vuelan como `Pinguino` o `Kiwi`.
+Es por esto que `Venteveo` va a heredar de `Pajaro` (sin el método volar) y `Volador` (con el método)
+
+**Ejemplo**
+```cpp
+class Base {
+public:
+    void metodoBase() {
+        std::cout << "Soy un método de la clase Base\n";
+    }
+};
+
+class Derivada : public Base {  // "public" define el tipo de herencia
+public:
+    void metodoDerivado() {
+        std::cout << "Soy un método de la clase Derivada\n";
+    }
+};
+```
+
+### 3.4 Polimorfismo
+El polimorfismo significa "muchas formas". En C++, permite que una misma interfaz (ej. un método) tenga distintas implementaciones dependiendo del objeto.
+
+Existen dos tipos:
+1. Polimorfismo en tiempo de compilación (sobrecarga de funciones y operadores).
+2. Polimorfismo en tiempo de ejecución (funciones virtuales y herencia).
+
+**En tiempo de compilación**
+La sobrecarga de funciones es definir una arriba de otra funciones que toman distintos tipos, haciendo que se acceda primero a la superior y vaya bajando la jerarquía.
+La sobrecarga de operadores ya fue cubierta en [Constructores](#33-sobrecarga-de-operadores).
+
+```cpp
+class Calculadora {
+public:
+    int suma(int a, int b) {
+        return a + b;
+    }
+
+    double suma(double a, double b) {
+        return a + b;
+    }
+};
+```
+
+#### Método Virtual
+El polimorfismo en tiempo de ejecución aparece cuando trabajamos con punteros o referencias a clases padre.
+
+Ejemplo intuitivo:
+- Tienes una clase padre Animal con un método hablar().
+- Varias clases hijas (Perro, Gato, etc.) sobrescriben ese método.
+- Si tienes un Animal* que apunta a un Perro, ¿qué hablar() debe llamar?
+👉 Aquí entra el despacho dinámico: la decisión se hace en tiempo de ejecución.
+
+Una **función virtual** es una función que se declara con la palabra clave `virtual` en la clase padre, y que puede ser sobrescrita en las clases hijas.
+
+>**Conceptos detrás del mecanismo (dato de color)**
+>Cuando declaras una función como virtual:
+>1. El compilador genera una tabla de funciones virtuales (vtable) para la clase.
+>    - Esta tabla contiene punteros a las implementaciones de las funciones virtuales.
+>2. Cada objeto que tiene métodos virtuales guarda un puntero oculto a su vtable (llamado vptr).
+>3. Cuando llamas a una función virtual a través de un puntero o referencia a base:
+>    - El programa mira el vptr del objeto en tiempo de ejecución.
+>    - Usa la vtable para encontrar la función correcta.
+>    - Llama a la implementación adecuada de la clase derivada.
+>
+>👉 Esto se conoce como despacho dinámico o dynamic dispatch.
+
+#### 🚨 Destrucción virtual (Importante)
+Cuando trabajamos con herencia y punteros, el destructor de la clase padre debe ser virtual, o puedes tener fugas de memoria.
+
+Si el destructor no fuera virtual, al eliminar una clase hija (a partir de un puntero de la clase padre) se ejecutaría el destructor del padre solamente y no del hijo.
+
+
+#### Método Virtual Puro
+
+Un **método virtual puro** es un método que se declara en la clase padre sin implementación obligatoria. Se indica con = 0.
+
+La principal diferencia con `virtual` normal es que este permite una implementación por defecto y luego ser sobreescrito.
+`virtual puro` no tiene implementación obligatoria en la clase base; fuerza a la clase hija a implementarlo.. Si no lo hace, la clase derivada también será abstracta.
+
+#### Ejemplo completo
+
+```cpp
+class Figura {
+public:
+    virtual void dibujar() const = 0;   // método puro virtual
+    virtual ~Figura() = default;        // destructor virtual para evitar fugas
+};
+
+class Circulo : public Figura {
+public:
+    void dibujar() const override {
+        cout << "Dibujando un círculo" << endl;
+    }
+};
+
+class Rectangulo : public Figura {
+public:
+    void dibujar() const override {
+        cout << "Dibujando un rectángulo" << endl;
+    }
+};
+
+int main() {
+    vector<Figura*> figuras;
+    figuras.push_back(new Circulo());
+    figuras.push_back(new Rectangulo());
+
+    for (auto f : figuras) {
+        f->dibujar(); // Polimorfismo en acción
+    }
+
+    for (auto f : figuras) delete f; // liberar memoria
+    // como el destructor de padre es virtual se evitan memory leaks
+    // una memory leak sería sería eliminar la clase padre y no la hija
+}
+```
+
+### 3.5 Clases Abstractas (Interfaces)
+
+En C++, una clase abstracta es una clase que no puede ser instanciada directamente (no puedes hacer Clase c;) y está pensada para servir como padre para otras clases.
+
+Se utiliza cuando queremos definir una interfaz común para un conjunto de clases hijas, pero dejando la implementación de ciertos métodos a esas clases hijas.
+
+Se puede simular una `Interfaz` (como en Java por ejemplo) haciendo una clase que: 
+- Sólo tiene [métodos virtuales puros](#método-virtual-puro).
+- No contiene implementación (salvo quizá un destructor virtual).
+
+**La clase Figura del [Ejemplo completo de Polimorfismo](#ejemplo-completo) es una clase abstracta**
+Notar que se trabajan con punteros y no valores de Figura.
+
+#### Cuidados a tener
+- Destructor virtual obligatorio:
+Si vas a heredar de una clase abstracta y destruir objetos por punteros base, siempre define un destructor virtual en la clase abstracta.
+De lo contrario → Undefined Behavior y memory leaks.
+- Clases derivadas pueden ser abstractas:
+Si una clase hija no implementa todos los métodos puros virtuales de la base, también será abstracta.
+- Herencia múltiple y conflictos:
+C++ permite herencia múltiple, pero si implementas varias interfaces (clases abstractas) que tengan el mismo método, puede generar ambigüedad → se resuelve con `override` explícito.
+
+### Funciones amigas
+Una función amiga (`friend`) es una función que no pertenece a una clase, pero que tiene acceso a los miembros privados y protegidos de esa clase.
+
+Normalmente, los miembros privados solo pueden accederse desde la propia clase o desde sus métodos.
+La función amiga rompe esa restricción de acceso, permitiendo acceder directamente a los datos privados.
+
+También es posible declarar una clase amiga completa, la cual tiene acceso a miembros privados/protected también.
+
+**Cuidado: rompe encapsulamiento**
+
+#### Características
+- No es miembro de la clase:
+- No se llama con obj.func(), sino como función global (func(obj)).
+- Puede acceder a privados y protegidos de la clase.
+- Se declara dentro de la clase con la palabra clave friend, pero se define fuera.
+
+##### Ejemplo:
+
+```cpp
+class Caja {
+private:
+    int contenido;
+
+public:
+    Caja(int c) : contenido(c) {}
+
+    // Declaración de función amiga
+    friend void mostrarContenido(const Caja& c);
+};
+
+// Definición fuera de la clase
+void mostrarContenido(const Caja& c) {
+    std::cout << "Contenido: " << c.contenido << std::endl;
+}
+
+int main() {
+    Caja c(42);
+    mostrarContenido(c); // Función amiga puede acceder al miembro privado
+}
+```
