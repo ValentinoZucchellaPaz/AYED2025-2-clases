@@ -13,7 +13,7 @@ Este documento es para estudio de la materia, basado en mis notas de las clases,
 Esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
 **Si encontrás un error en conceptos o código o simplemente quieras dejar tu feedback, no dudes en hablarme [vzucchellapaz@mi.unc.edu.ar](mailto::vzucchellapaz@mi.unc.edu.ar)**
 
-==DISCLAIMER==: No se busca reemplazar ni socavar las enseñanzas de la cátedra, si acá leen A y en la clase les dicen B, sigan B. Esto son MIS notas.
+<mark>DISCLAIMER</mark>: No se busca reemplazar ni socavar las enseñanzas de la cátedra, si acá leen A y en la clase les dicen B, sigan B. Esto son MIS notas.
 
 ---
 
@@ -533,7 +533,7 @@ Si no lo definimos, C++ genera uno implícito (que inicializa los miembros con v
 Permite inicializar los miembros con valores específicos.
 3. **Copia**
 Se invoca cuando se crea un objeto a partir de otro del mismo tipo.
-Por defecto, C++ genera uno que copia miembro a miembro, ==esta copia es SUPERFICIAL, si hay un miembro que es un puntero (por ejemplo un array), copiará el puntero y dos objetos copiados compartirán el mismo array.==
+Por defecto, C++ genera uno que copia miembro a miembro,<mark>esta copia es SUPERFICIAL, si hay un miembro que es un puntero (por ejemplo un array), copiará el puntero y dos objetos copiados compartirán el mismo array. </mark>
 4. **Movimiento**
 Se usa cuando el objeto se inicializa a partir de un temporal o un recurso que se puede "mover".
 Evita copias innecesarias, optimizando el rendimiento.
@@ -554,7 +554,7 @@ Se usa principalmente para liberar recursos que el objeto pudo haber adquirido d
 - Objetos globales o estáticos → al finalizar el programa.
 
 **Destructor por Defecto**
-Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembor (si tienen). ==Esto no libera memoria dinamica (heap)==, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
+Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembor (si tienen). <mark>Esto no libera memoria dinamica (heap)</mark>, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
 
 **Importancia**
 Si no liberas lo que reservaste en el constructor (o métodos), tendrás memory leaks.
