@@ -1,16 +1,19 @@
 # Resumenes por unidad AYED 2025
 
-**Valentino Zucchella Paz**
+**Valentino Zucchella Paz**  
 
-**Facultad**: FCEFyN (UNC)
-**Carrera**: Ing. en Computación.
-**Materia**: Algoritmos y Estructuras de Datos.
+**Facultad**: FCEFyN (UNC)  
+**Carrera**: Ing. en Computación.  
+**Materia**: Algoritmos y Estructuras de Datos.  
 
 Se verán estructuras de datos y algoritmos usando C++.
-Este documento es para estudio de la materia, basado en mis notas en conjunto con la ayuda de ChatGPT y web para investigar y sacarme dudas.
-Como esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
 
+El código es sobre las clases prácticas del docente Pablo Gomez, sobre el cual hago comentarios segun creo conveniente.
+Este documento es para estudio de la materia, basado en mis notas de las clases, en conjunto con la ayuda de ChatGPT y web para investigar y sacarme dudas.
+Esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
 **Si encontrás un error en conceptos o código o simplemente quieras dejar tu feedback, no dudes en hablarme [vzucchellapaz@mi.unc.edu.ar](mailto::vzucchellapaz@mi.unc.edu.ar)**
+
+==DISCLAIMER==: No se busca reemplazar ni socavar las enseñanzas de la cátedra, si acá leen A y en la clase les dicen B, sigan B. Esto son MIS notas.
 
 ---
 
@@ -31,11 +34,11 @@ Como esto es un apunte informal no habrá links o referencias de bibliografia, p
 3. [Estructuras y Clases](#3-estructuras-y-clases)
     1. [Bases](#31-bases)
     2. [Inicialización](#32-inicialización)
-    3. [Constructores](#33-constructores)
-    4. [Sobrecarga de Operadores](#33-sobrecarga-de-operadores)
-    5. [Herencia](#34-herencia)
-    6. [Polimorfismo](#34-polimorfismo)
-    7. [Clases Abstractas (Interfaces)](#35-clases-abstractas-interfaces)
+    3. [Constructores y Destructores](#33-constructores-y-destructores)
+    4. [Sobrecarga de Operadores](#34-sobrecarga-de-operadores)
+    5. [Herencia](#35-herencia)
+    6. [Polimorfismo](#36-polimorfismo)
+    7. [Clases Abstractas (Interfaces)](#37-clases-abstractas-interfaces)
 
 ---
 
@@ -393,7 +396,10 @@ int main() {
 
 Ya existe una materia que estudia a fondo la Programación Orientada a Objetos, pero debido a cambio de planes algunos no la tuvieron por lo que pueden estar confundidos con algunos conceptos. [Este es un blog interesante sobre POO](https://coderslink.com/talento/blog/que-es-la-programacion-orientada-a-objetos-poo-y-cuales-son-sus-principios-fundamentales/)
 
+*Luego de las bases se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.*
+
 ### 3.1 Bases
+Si ya viste algo de POO y clases pasa a la prox.
 
 En programación orientada a objetos, una **clase** es un molde o
 plantilla que define cómo serán los objetos.  
@@ -443,7 +449,14 @@ public: // Acceso público: las instancias pueden llamar a lo que hay aquí dent
         velocidad += 10;
         std::cout << marca << " va a " << velocidad << " km/h" << std::endl;
     }
+
+    // Método a implementar antes de main
+    void groovy()
 };
+
+void Coche::groovy(){
+    std::cout << "groovy\n";
+}
 
 struct Coordenada {
     int x;
@@ -451,7 +464,7 @@ struct Coordenada {
 };
 ```
 
-Para crear instancias (objetos) se inicializan usando el constructor:
+Para crear instancias (objetos) se inicializan usando el constructor (dentro de main):
 
 ``` cpp
 Coche c1("Toyota", 100);
@@ -504,17 +517,14 @@ Se usa `new` cuando se llama al constructor, tiene las siguientes caracteristica
 | `Persona p = Persona(...);` | Stack (igual que directa)          | Scope                      |
 
 
-### 3.3 Constructores
+### 3.3 Constructores y Destructores
 
-Un constructor es una función miembro especial que se llama automáticamente cuando se crea un objeto.
+Un **constructor** es una función miembro especial que se llama automáticamente cuando se crea un objeto.
 - Tiene el mismo nombre que la clase/struct.
 - No tiene tipo de retorno (ni void).
 - Se usa para inicializar datos miembros.
 
-
-*Se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.*
-
-####  Tipos de constructores
+####  Tipos
 
 1. **Por defecto**
 Se invoca cuando no se pasan parámetros al crear un objeto.
@@ -523,15 +533,61 @@ Si no lo definimos, C++ genera uno implícito (que inicializa los miembros con v
 Permite inicializar los miembros con valores específicos.
 3. **Copia**
 Se invoca cuando se crea un objeto a partir de otro del mismo tipo.
-Por defecto, C++ genera uno que copia miembro a miembro (shallow copy, los objetos anidados serán los mismos).
-**Ejemplo**
+Por defecto, C++ genera uno que copia miembro a miembro, ==esta copia es SUPERFICIAL, si hay un miembro que es un puntero (por ejemplo un array), copiará el puntero y dos objetos copiados compartirán el mismo array.==
+4. **Movimiento**
+Se usa cuando el objeto se inicializa a partir de un temporal o un recurso que se puede "mover".
+Evita copias innecesarias, optimizando el rendimiento.
+
+#### Destructor
+Un **destructor** es una método especial que se llama automáticamente cuando un objeto de esa clase es destruido.
+Se usa principalmente para liberar recursos que el objeto pudo haber adquirido durante su vida (memoria dinámica, archivos abiertos, conexiones de red, etc.)
+
+**Caracteristicas:**
+- Se llama igual que la clase pero con una virgulilla ~ delante.
+- No devuelve nada (void implícito).
+- No recibe parámetros.
+- No se puede sobrecargar (solo hay uno por clase).
+
+**¿Cuándo se llama al destructor?**
+- Objeto local (en stack) → al salir de su ámbito.
+- Objeto dinámico (heap) con new → cuando usamos delete.
+- Objetos globales o estáticos → al finalizar el programa.
+
+**Destructor por Defecto**
+Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembor (si tienen). ==Esto no libera memoria dinamica (heap)==, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
+
+**Importancia**
+Si no liberas lo que reservaste en el constructor (o métodos), tendrás memory leaks.
+Si tu clase gestiona recursos, probablemente necesites definir:
+- Destructor
+- Constructor de copia
+- Operador de asignación
+
+
+
+#### Ejemplos
+**Constructores y destructor**
 ```cpp
 struct Punto {
     int x, y;
+    int [] recurso;
+
     // Constructor Parametizado
-    Punto(int xVal, int yVal) : x(xVal), y(yVal) {}
-    // Constructor de copia (existe aunque no lo escriba)
-    Punto(const Punto& otro) : x(otro.x), y(otro.y) {}
+    Punto(int xVal, int yVal) : x(xVal), y(yVal) { 
+        recurso = new int[5];
+    }
+    // Constructor de Copia Custom (deep copy)
+    Punto(const Punto& otro) : x(otro.x), y(otro.y) {
+        recurso = new int[5];
+        for(int i = 0; i< 5; i++) recurso[i] = otro.recurso[i];
+    }
+    // Destructor Custom
+    ~Punto() {
+        std::cout << "Destructor llamado\n";
+        delete[] recurso; // liberamos memoria
+        // primitivos (int) se borran automaticamente al salir del stack
+        // "se dejan morir"
+    }
     // Constructor por defecto (existe aunque no lo escriba)
     Punto() : x(0), y(0) {}
 };
@@ -539,12 +595,12 @@ struct Punto {
 int main() {
     Punto p1(5, 10);
     Punto p2 = p1; // Copia los valores de p1
+    delete p1; // se llama destructor
 }
 ```
-4. **Movimiento**
-Se usa cuando el objeto se inicializa a partir de un temporal o un recurso que se puede "mover".
-Evita copias innecesarias, optimizando el rendimiento.
-**Ejemplo**
+Con esta implementación se evita que se comparta un mismo array al hacer copias y memory leaks al borrar el objeto.
+
+**Ejemplo constructor de movimiento**
 ```cpp
 struct Vector {
     vector<int> datos; // <- tipo de c++, se hace #include <vector>
@@ -559,7 +615,7 @@ int main() {
 }
 ```
 
-### 3.3 Sobrecarga de operadores
+### 3.4 Sobrecarga de operadores
 La sobrecarga de operadores permite redefinir el comportamiento de operadores como +, -, =, ==, etc.
 
 - Operadores que sí se pueden sobrecargar
@@ -601,7 +657,7 @@ int main() {
 }
 ```
 
-### 3.4 Herencia
+### 3.5 Herencia
 La herencia es un mecanismo de la Programación Orientada a Objetos (POO) que permite a una clase (clase hijo) reutilizar atributos y métodos de otra clase (clase padre).
 **Esto favorece la reutilización de código y el diseño jerárquico.**
 
@@ -637,7 +693,7 @@ public:
 };
 ```
 
-### 3.4 Polimorfismo
+### 3.6 Polimorfismo
 El polimorfismo significa "muchas formas". En C++, permite que una misma interfaz (ej. un método) tenga distintas implementaciones dependiendo del objeto.
 
 Existen dos tipos:
@@ -688,7 +744,9 @@ Una **función virtual** es una función que se declara con la palabra clave `vi
 #### 🚨 Destrucción virtual (Importante)
 Cuando trabajamos con herencia y punteros, el destructor de la clase padre debe ser virtual, o puedes tener fugas de memoria.
 
-Si el destructor no fuera virtual, al eliminar una clase hija (a partir de un puntero de la clase padre) se ejecutaría el destructor del padre solamente y no del hijo.
+Al eliminar una clase hija a partir de un puntero de la clase padre:
+- Destructor no virtual: se ejecutaría el destructor del padre solamente y no del hijo.
+- Destructor virtual: se ejecutaría el destructor del padre y recursivamente el de los hijos.
 
 
 #### Método Virtual Puro
@@ -741,7 +799,7 @@ Si no borrara los destructores con salida por cout, vería los dos eliminando pa
 Pero si no pusiera el virtual tendría solo eliminando padre.
 Esto es una memory leak, se elimina la clase padre y no la hija
 
-### 3.5 Clases Abstractas (Interfaces)
+### 3.7 Clases Abstractas (Interfaces)
 
 En C++, una clase abstracta es una clase que no puede ser instanciada directamente (no puedes hacer Clase c;) y está pensada para servir como padre para otras clases.
 
@@ -763,7 +821,7 @@ Si una clase hija no implementa todos los métodos puros virtuales de la base, t
 - Herencia múltiple y conflictos:
 C++ permite herencia múltiple, pero si implementas varias interfaces (clases abstractas) que tengan el mismo método, puede generar ambigüedad → se resuelve con `override` explícito.
 
-### Funciones amigas
+### 3.8 Funciones amigas
 Una función amiga (`friend`) es una función que no pertenece a una clase, pero que tiene acceso a los miembros privados y protegidos de esa clase.
 
 Normalmente, los miembros privados solo pueden accederse desde la propia clase o desde sus métodos.
