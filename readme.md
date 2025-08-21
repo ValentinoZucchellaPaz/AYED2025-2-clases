@@ -533,7 +533,7 @@ Si no lo definimos, C++ genera uno implícito (que inicializa los miembros con v
 Permite inicializar los miembros con valores específicos.
 3. **Copia**
 Se invoca cuando se crea un objeto a partir de otro del mismo tipo.
-Por defecto, C++ genera uno que copia miembro a miembro,<mark>esta copia es SUPERFICIAL, si hay un miembro que es un puntero (por ejemplo un array), copiará el puntero y dos objetos copiados compartirán el mismo array. </mark>
+Por defecto, C++ genera uno que copia miembro a miembro, <mark>esta copia es SUPERFICIAL, si hay un miembro que es un puntero (por ejemplo un array), copiará el puntero y dos objetos copiados compartirán el mismo array. </mark>
 4. **Movimiento**
 Se usa cuando el objeto se inicializa a partir de un temporal o un recurso que se puede "mover".
 Evita copias innecesarias, optimizando el rendimiento.
@@ -543,20 +543,24 @@ Un **destructor** es una método especial que se llama automáticamente cuando u
 Se usa principalmente para liberar recursos que el objeto pudo haber adquirido durante su vida (memoria dinámica, archivos abiertos, conexiones de red, etc.)
 
 **Caracteristicas:**
+
 - Se llama igual que la clase pero con una virgulilla ~ delante.
 - No devuelve nada (void implícito).
 - No recibe parámetros.
 - No se puede sobrecargar (solo hay uno por clase).
 
 **¿Cuándo se llama al destructor?**
+
 - Objeto local (en stack) → al salir de su ámbito.
 - Objeto dinámico (heap) con new → cuando usamos delete.
 - Objetos globales o estáticos → al finalizar el programa.
 
 **Destructor por Defecto**
+
 Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembor (si tienen). <mark>Esto no libera memoria dinamica (heap)</mark>, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
 
 **Importancia**
+
 Si no liberas lo que reservaste en el constructor (o métodos), tendrás memory leaks.
 Si tu clase gestiona recursos, probablemente necesites definir:
 - Destructor
@@ -601,6 +605,7 @@ int main() {
 Con esta implementación se evita que se comparta un mismo array al hacer copias y memory leaks al borrar el objeto.
 
 **Ejemplo constructor de movimiento**
+
 ```cpp
 struct Vector {
     vector<int> datos; // <- tipo de c++, se hace #include <vector>
@@ -754,7 +759,7 @@ Al eliminar una clase hija a partir de un puntero de la clase padre:
 Un **método virtual puro** es un método que se declara en la clase padre sin implementación obligatoria. Se indica con = 0.
 
 La principal diferencia con `virtual` normal es que este permite una implementación por defecto y luego ser sobreescrito.
-`virtual puro` no tiene implementación obligatoria en la clase base; fuerza a la clase hija a implementarlo.. Si no lo hace, la clase derivada también será abstracta.
+`virtual puro` no tiene implementación obligatoria en la clase base; fuerza a la clase hija a implementarlo. Si no lo hace, la clase derivada también será abstracta.
 
 #### Ejemplo completo
 
