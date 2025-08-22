@@ -8,12 +8,13 @@
 
 Se verán estructuras de datos y algoritmos usando C++.
 
-El código es sobre las clases prácticas del docente Pablo Gomez, sobre el cual hago comentarios segun creo conveniente.
+El código es sobre las clases prácticas del docente Pablo Gomez.
 Este documento es para estudio de la materia, basado en mis notas de las clases, en conjunto con la ayuda de ChatGPT y web para investigar y sacarme dudas.
 Esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
+
 **Si encontrás un error en conceptos o código o simplemente quieras dejar tu feedback, no dudes en hablarme [vzucchellapaz@mi.unc.edu.ar](mailto::vzucchellapaz@mi.unc.edu.ar)**
 
-<mark>DISCLAIMER</mark>: No se busca reemplazar ni socavar las enseñanzas de la cátedra, si acá leen A y en la clase les dicen B, sigan B. Esto son MIS notas.
+Estas son mis notas de estudio personal, cualquier diferencia con lo que digan los profes recomiendo seguir lo que dice el profe, yo soy estudiante :)
 
 ---
 
@@ -32,13 +33,15 @@ Esto es un apunte informal no habrá links o referencias de bibliografia, pero s
     4. [Punteros vs Referencia](#25-punteros-vs-referencias)
     5. [Resumen de unidad](#26-resumen-de-unidad)
 3. [Estructuras y Clases](#3-estructuras-y-clases)
-    1. [Bases](#31-bases)
-    2. [Inicialización](#32-inicialización)
-    3. [Constructores y Destructores](#33-constructores-y-destructores)
+    1. [Bases](#30-bases)
+    2. [Puntero this](#31-puntero-this)
+    3. [Inicialización](#32-inicialización)
+    4. [Constructores y Destructores](#33-constructores-y-destructores)
     4. [Sobrecarga de Operadores](#34-sobrecarga-de-operadores)
     5. [Herencia](#35-herencia)
     6. [Polimorfismo](#36-polimorfismo)
     7. [Clases Abstractas (Interfaces)](#37-clases-abstractas-interfaces)
+    8. [Funciones Amigas](#38-funciones-amigas)
 
 ---
 
@@ -398,7 +401,7 @@ Ya existe una materia que estudia a fondo la Programación Orientada a Objetos, 
 
 *Luego de las bases se hablará de clases pero se debe tener en mente que todo es aplicable a estructuras, su única diferencia es que struct tiene miembros públicos por defecto, y en class privados.*
 
-### 3.1 Bases
+### 3.0 Bases
 Si ya viste algo de POO y clases pasa a la prox.
 
 En programación orientada a objetos, una **clase** es un molde o
@@ -430,7 +433,6 @@ Aunque hoy en día se pueden usar casi igual, hay diferencias de estilo y semán
 | **Estilo / Convención** | Representa **objetos complejos**, entidades con lógica               | Representa **datos livianos** o registros de datos                |
 | **Herencia**            | Privada por defecto                                                  | Pública por defecto                                               |
 | **Uso típico**          | Modelar entidades del dominio (ej: Usuario, Pedido, Cuenta)          | Modelar estructuras de datos (ej: Punto, Vector3D, Configuración) |
-
 
 #### Ejemplo Comparativo
 
@@ -473,6 +475,40 @@ c1.acelerar(); // Métodos, encapsulación
 Coordenada punto {5, 7};
 std::cout << "X: " << punto.x << ", Y: " << punto.y << std::endl; // Datos simples
 ```
+
+### 3.1 Puntero `this`
+
+En C++, el puntero `this` es un puntero especial disponible dentro de los métodos de una clase.  
+Apunta al objeto actual sobre el que se está invocando el método.
+
+**¿Para qué se usa?**
+- Permite acceder a los miembros del objeto actual explícitamente.
+- Es útil para **distinguir entre parámetros y atributos cuando tienen el mismo nombre**.
+- Se usa en métodos que devuelven una referencia al propio objeto (`return *this;`), por ejemplo en operadores de asignación encadenada.
+- Es necesario para obtener la dirección del objeto actual, por ejemplo al pasar el objeto por puntero.
+
+**Ejemplo de uso:**
+```cpp
+class Persona {
+    std::string nombre;
+public:
+    Persona(const std::string& nombre) : nombre(nombre) {}
+
+    void setNombre(const std::string& nombre) {
+        this->nombre = nombre; // 'this' distingue el atributo del parámetro
+    }
+
+    Persona& operator=(const Persona& otra) {
+        if (this != &otra) { // evita auto-asignación
+            nombre = otra.nombre;
+        }
+        return *this; // permite asignaciones encadenadas
+    }
+};
+```
+
+El puntero `this` es fundamental para la correcta gestión de los objetos y su identidad dentro
+
 
 ### 3.2 Inicialización
 ```cpp
@@ -557,11 +593,11 @@ Se usa principalmente para liberar recursos que el objeto pudo haber adquirido d
 
 **Destructor por Defecto**
 
-Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembor (si tienen). <mark>Esto no libera memoria dinamica (heap)</mark>, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
+Si no se declara uno, el compilador designa uno default, el cual llama al destructor de cada miembro (si tienen). <mark>Esto no libera memoria dinamica (heap)</mark>, si se tienen arrays se debe implementar un destructor en la clase para liberar los recursos.
 
 **Importancia**
 
-Si no liberas lo que reservaste en el constructor (o métodos), tendrás memory leaks.
+Si no liberas lo que reservaste en el constructor (o métodos), tendrás [memory leaks](#memory-leaks).
 Si tu clase gestiona recursos, probablemente necesites definir:
 - Destructor
 - Constructor de copia
@@ -668,7 +704,6 @@ La herencia es un mecanismo de la Programación Orientada a Objetos (POO) que pe
 
 *Siempre tener en cuenta que se va a heredar lo público y protegido, los campos privados no pasarán a la clase hijo*
 
-*Resulta conveniente leer sobre los cuidados con los [destructores de clase padre](#-destrucción-virtual-importante)*
 
 **Tipos de herencia:**
 - `public`: lo público en el padre sigue siendo público en el hijo (la más común).
@@ -683,14 +718,19 @@ Es por esto que `Venteveo` va a heredar de `Pajaro` (sin el método volar) y `Vo
 
 **Ejemplo**
 ```cpp
-class Base {
+class Base1 {
 public:
     void metodoBase() {
         std::cout << "Soy un método de la clase Base\n";
     }
 };
 
-class Derivada : public Base {  // "public" define el tipo de herencia
+class Base2 {
+    // ...
+}
+
+class Derivada : public Base1, protected Base2 {  
+    // "public" y "protected" definen el tipo de herencia
 public:
     void metodoDerivado() {
         std::cout << "Soy un método de la clase Derivada\n";
@@ -730,6 +770,7 @@ Ejemplo intuitivo:
 - Varias clases hijas (`Perro`, `Gato`, etc.) sobrescriben ese método.
 - Si tienes un puntero de tipo `Animal*` que apunta a un Perro, ¿qué `hablar()` debe llamar?
 👉 Aquí entra el despacho dinámico: la **decisión se hace en tiempo de ejecución**.
+Siempre se va a llamar al metodo más abajo en la jerarquía de herencia (hijo).
 
 Una **función virtual** es una función que se declara con la palabra clave `virtual` en la clase padre, y que puede ser sobrescrita en las clases hijas.
 
@@ -756,10 +797,12 @@ Al eliminar una clase hija a partir de un puntero de la clase padre:
 
 #### Método Virtual Puro
 
-Un **método virtual puro** es un método que se declara en la clase padre sin implementación obligatoria. Se indica con = 0.
+Un **método virtual puro** es un método que se declara en la clase padre sin implementación. Se indica con = 0.
 
 La principal diferencia con `virtual` normal es que este permite una implementación por defecto y luego ser sobreescrito.
-`virtual puro` no tiene implementación obligatoria en la clase base; fuerza a la clase hija a implementarlo. Si no lo hace, la clase derivada también será abstracta.
+`virtual puro` no tiene implementación en la clase base; fuerza a la clase hija a implementarlo. Si no lo hace, la clase derivada también será abstracta.
+
+Ambos usan la misma palabra, es una diferencia en terminos de uso simplemente.
 
 #### Ejemplo completo
 
@@ -806,35 +849,36 @@ Esto es una memory leak, se elimina la clase padre y no la hija
 
 ### 3.7 Clases Abstractas (Interfaces)
 
-En C++, una clase abstracta es una clase que no puede ser instanciada directamente (no puedes hacer Clase c;) y está pensada para servir como padre para otras clases.
+En C++, una **clase abstracta es una clase que no puede ser instanciada directamente** (no puedes hacer Clase c;) y está pensada para servir como padre para otras clases.
 
 Se utiliza cuando queremos definir una interfaz común para un conjunto de clases hijas, pero dejando la implementación de ciertos métodos a esas clases hijas.
 
 Se puede simular una `Interfaz` (como en Java por ejemplo) haciendo una clase que: 
-- Sólo tiene [métodos virtuales puros](#método-virtual-puro).
+- **Sólo tiene [métodos virtuales puros](#método-virtual-puro).**
 - No contiene implementación (salvo quizá un destructor virtual).
 
 **La clase Figura del [Ejemplo completo de Polimorfismo](#ejemplo-completo) es una clase abstracta**
 Notar que se trabajan con punteros y no valores de Figura.
 
 #### Cuidados a tener
-- Destructor virtual obligatorio:
+- **Destructor virtual obligatorio:**
 Si vas a heredar de una clase abstracta y destruir objetos por punteros base, siempre define un destructor virtual en la clase abstracta.
 De lo contrario → Undefined Behavior y memory leaks.
-- Clases derivadas pueden ser abstractas:
+- **Clases derivadas pueden ser abstractas:**
 Si una clase hija no implementa todos los métodos puros virtuales de la base, también será abstracta.
-- Herencia múltiple y conflictos:
+- **Herencia múltiple y conflictos:**
 C++ permite herencia múltiple, pero si implementas varias interfaces (clases abstractas) que tengan el mismo método, puede generar ambigüedad → se resuelve con `override` explícito.
 
 ### 3.8 Funciones amigas
 Una función amiga (`friend`) es una función que no pertenece a una clase, pero que tiene acceso a los miembros privados y protegidos de esa clase.
 
 Normalmente, los miembros privados solo pueden accederse desde la propia clase o desde sus métodos.
-La función amiga rompe esa restricción de acceso, permitiendo acceder directamente a los datos privados.
+La función amiga rompe esa restricción de acceso, permitiendo acceder directamente a los datos privados. Vendría a ser un reemplazo a un getter (entre muchas comillas).
 
-También es posible declarar una clase amiga completa, la cual tiene acceso a miembros privados/protected también.
+También es posible declarar una **clase amiga** completa, la cual tiene acceso a miembros privados/protected también.
 
-**Cuidado: rompe encapsulamiento**
+**Cuidado: rompe encapsulamiento**.
+Es algo que existe pero no es recomendable, se recomienda mantener encapsulamiento y crear getter y setters.
 
 #### Características
 - No es miembro de la clase:
@@ -866,3 +910,73 @@ int main() {
     mostrarContenido(c); // Función amiga puede acceder al miembro privado
 }
 ```
+
+### 3.9 Unions y Enums
+
+#### Unions
+
+Una **union** es una estructura especial que permite almacenar diferentes tipos de datos en el mismo espacio de memoria, pero solo uno de ellos a la vez.  
+Todos los miembros de una union comparten la misma dirección de memoria, por lo que el tamaño de la union será el del miembro más grande.
+
+**¿Para qué se usan?**
+- Para ahorrar memoria cuando solo se necesita almacenar un valor de varios posibles tipos, pero nunca más de uno al mismo tiempo.
+- Son útiles en estructuras de datos que representan variantes o mensajes con diferentes formatos.
+
+**Ejemplo:**
+```cpp
+union Dato {
+    int i;
+    float f;
+    char c;
+};
+
+Dato d;
+d.i = 42;      // Ahora d.i tiene valor, pero d.f y d.c comparten ese espacio
+d.f = 3.14f;   // Ahora d.f tiene valor, y d.i se sobrescribe
+```
+**Precaución:**  
+Solo se debe acceder al miembro que fue asignado más recientemente.
+
+---
+
+#### Enums
+
+Un **enum** (enumeración) es un tipo de dato que permite definir un conjunto de valores simbólicos (constantes enteras) bajo un mismo nombre.  
+Sirve para mejorar la legibilidad y evitar el uso de números mágicos en el código.
+
+**¿Para qué se usan?**
+- Para representar estados, opciones, tipos o categorías con nombres descriptivos.
+- Facilitan el mantenimiento y la comprensión del código.
+
+**Ejemplo clásico:**
+```cpp
+enum Color { Rojo, Verde, Azul };
+Color c = Verde;
+```
+Por defecto, los valores son enteros consecutivos empezando en 0 (`Rojo=0, Verde=1, Azul=2`).
+
+**Enum class (C++11):**
+Permite mayor seguridad de tipos y evita colisiones de nombres.
+```cpp
+enum class Direccion { Norte, Sur, Este, Oeste };
+Direccion d = Direccion::Norte;
+```
+
+**Mostrar el nombre de un enum:**
+C++ no tiene una función estándar para convertir un valor de enum a string.  
+Se suele usar un `switch` para mapear los valores (o un map, más avanzado):
+```cpp
+std::string direccionToString(Direccion d) {
+    switch (d) {
+        case Direccion::Norte: return "Norte";
+        case Direccion::Sur: return "Sur";
+        case Direccion::Este: return "Este";
+        case Direccion::Oeste: return "Oeste";
+        default: return "Desconocido";
+    }
+}
+```
+
+**Resumen:**
+- **union:** comparte memoria entre varios tipos, solo uno activo a la vez.
+- **enum:** define un conjunto de constantes simbólicas, mejora legibilidad y
