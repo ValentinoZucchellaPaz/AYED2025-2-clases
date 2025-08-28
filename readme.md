@@ -42,6 +42,10 @@ Estas son mis notas de estudio personal, cualquier diferencia con lo que digan l
     6. [Polimorfismo](#36-polimorfismo)
     7. [Clases Abstractas (Interfaces)](#37-clases-abstractas-interfaces)
     8. [Funciones Amigas](#38-funciones-amigas)
+    9. [Unions y Enums](#39-unions-y-enums)
+    10. [Programación genérica](#310-programación-genérica)
+4. [Recursión](#4-recursión)
+    1. 
 
 ---
 
@@ -980,3 +984,120 @@ std::string direccionToString(Direccion d) {
 **Resumen:**
 - **union:** comparte memoria entre varios tipos, solo uno activo a la vez.
 - **enum:** define un conjunto de constantes simbólicas, mejora legibilidad y
+
+
+### 3.10 Programación genérica
+
+La programación genérica permite escribir código independiente del tipo de datos, evitando duplicar funciones y clases para cada tipo, como un Polimorfismo de datos por asi decir.
+
+Esto se logra mediante el uso de plantillas, modelos de clases o funciones que pueden aceptar uno o más tipos de datos como parámetros.
+
+**Aunque útil e interesante como concepto de programación, fue poco mencionado en el curso asi que no lo tomen como un tema eje de la materia**
+
+```cpp
+template <typename T>
+T sumar(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    std::cout << sumar(3, 5) << "\n";      // T = int
+    std::cout << sumar(3.5, 2.1) << "\n";  // T = double
+}
+```
+
+Aquí T es un parámetro de tipo: el compilador genera una versión de la función para cada tipo usado.
+
+#### ¿Qué es T y cómo funciona?
+
+T no es mágico, es un alias para un tipo deducido por el compilador.
+
+template <typename T> (o template <class T>) significa: 
+"Esta función/clase depende de un tipo genérico T".
+
+Al compilar, se genera código específico para cada tipo usado → instanciación de plantilla.
+
+#### Ejemplo con todos los casos y aplicaciones
+```cpp
+#include <iostream>
+#include <string>
+
+template <typename T> // función genérica de suma
+T sumar(T a, T b) {
+    return a + b;
+}
+
+template <typename T> // función genérica de intercambio de vars
+void intercambiar(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+template <typename T> // clase con atributo genérico
+class Caja {
+    T valor;
+public:
+    Caja(T v) : valor(v) {}
+    T obtener() { return valor; }
+};
+
+template<typename T, typename U> // multiples tipos genericos
+auto sumarDistintos(T a, U b) -> decltype(a + b) {
+    return a + b;
+}
+
+template<> // especialización: versión especial para std::string
+std::string sumar<std::string>(std::string a, std::string b) {
+    return a + " " + b;
+}
+
+template<int N> // parametro no tipo (como si fuera constante)
+int multiplicarPorConstante(int x) {
+    return x * N;
+}
+
+int main() {
+    // sumar genérico
+    int r1 = sumar(3, 5);                      // T deducido como int
+    double r2 = sumar(3.5, 2.1);               // T deducido como double
+    std::string r3 = sumar(std::string("Hola"), std::string("Mundo")); // Especialización std::string
+
+    // intercambiar
+    int x = 10, y = 20;
+    intercambiar(x, y); // T deducido como int
+
+    // atributo de clase genérico
+    Caja<int> cajaInt(42);                     // Caja con int
+    Caja<std::string> cajaStr("Plantilla");    // Caja con std::string
+
+    // multiples tipos genéricos
+    auto r4 = sumarDistintos(5, 2.5);          // T=int, U=double
+
+    // multiplico por cte
+    int r = multiplicarPorConstante<5>(3); // Resultado = 15
+
+    return 0;
+}
+
+```
+
+### 4. Recursión
+
+
+La recursión es una técnica en programación donde una función se llama a sí misma para resolver un problema dividiéndolo en subproblemas más pequeños.
+
+**La idea central:**
+- Caso base: condición que detiene la recursión.
+- Caso recursivo: la función se llama a sí misma para acercarse al caso base, haciendo más pequeño el problema en cada llamada.
+
+Si no hay un caso base bien definido → la función entra en recursión infinita (stack overflow).
+
+Es más lo que se aprende de recursión con la práctica que leyendo sobre esta. 
+Algunos ejemplos donde se ve y aplica recursión son:
+
+- Problemas de programación:
+    - Backtracking: laberinto, sudoku, N-reinas.
+    - Divide and Conquer: merge sort, quick sort, binary search.
+- Fórmulas matemáticas: factorial o secuencia Fibonacci.
+- **Estructuras de Datos**: manipulación de arrays, arboles y grafos.
