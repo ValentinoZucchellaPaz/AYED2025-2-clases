@@ -10,7 +10,8 @@ Se verán estructuras de datos y algoritmos usando C++.
 
 El código es sobre las clases prácticas del docente Pablo Gomez.
 Este documento es para estudio de la materia, basado en mis notas de las clases, en conjunto con la ayuda de ChatGPT y web para investigar y sacarme dudas.
-Esto es un apunte informal no habrá links o referencias de bibliografia, pero si hay algo que no te cierra podes buscarlo o preguntarlo a tu agente de IA fav.
+
+Viendo que a medida que pasan las clases el documento se alarga bastante, recomiendo ir a la parte especifica que busquen en el índice, me termino yendo por las ramas con tal de estudiar de la forma más completa.
 
 **Si encontrás un error en conceptos o código o simplemente quieras dejar tu feedback, no dudes en hablarme [vzucchellapaz@mi.unc.edu.ar](mailto::vzucchellapaz@mi.unc.edu.ar)**
 

@@ -9,11 +9,13 @@
  * distintos es si saco &: entonces va a hacer una copia de la instancia que le hago, pero una copia Forma (pierdo info)
  * entonces solo encuentra el dibujar de Forma, imprimiendo Dibujar Forma aún cuando le paso un Circulo
  */
-void dibujarForma (const Forma& f) {
+void dibujarForma(const Forma &f)
+{
     f.dibujar();
 }
 
-int main() {
+int main()
+{
     Forma f;
     f.dibujar();
     Circulo c;

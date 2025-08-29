@@ -116,6 +116,8 @@ int main()
         inventario[i] = nullptr; // Evitar dangling pointers
     }
 
+    delete[] inventario;
+
     // Verificación de memoria liberada
     std::cout << "Memoria liberada correctamente." << std::endl;
 
