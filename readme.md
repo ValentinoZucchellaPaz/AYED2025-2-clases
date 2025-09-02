@@ -1102,3 +1102,85 @@ Algunos ejemplos donde se ve y aplica recursión son:
     - Divide and Conquer: merge sort, quick sort, binary search.
 - Fórmulas matemáticas: factorial o secuencia Fibonacci.
 - **Estructuras de Datos**: manipulación de arrays, arboles y grafos.
+
+#### 4.1 Tail Recursion
+En programación, cada vez que se llama a una función, el sistema agrega un **stack frame**(bloque) al **stack**. Este bloque contiene información como:
+- Valor de retorno
+- Dirección de la siguiente instrucción
+- Argumentos de la función
+- Variables locales
+
+En una recursión normal, cada llamada recursiva agrega un nuevo stack frame. Si la recursión es profunda, esto puede **llenar el stack** y provocar un **stack overflow**.
+
+La **recursión de cola** (tail recursion) es un tipo especial de recursión donde **la llamada recursiva es la última operación que hace la función**, es decir, no hay nada pendiente después de la llamada. Esto permite que el compilador pueda optimizar la recursión, reutilizando el mismo stack frame para cada llamada, en lugar de crear uno nuevo.
+
+#### 4.2 Función auxiliar para tail recursion
+
+Muchas veces se usa una función auxiliar para transformar una recursión normal en tail recursion, porque necesitamos llevar un acumulador o un estado que se vaya actualizando en cada llamada:
+
+```cpp
+// Recursión normal
+int factorial(int n) {
+    if (n == 0) return 1;
+    return n * factorial(n - 1); // operación pendiente después de la llamada
+}
+
+// Tail recursion con función auxiliar
+int factorialAux(int n, int acc) {
+    if (n == 0) return acc;
+    return factorialAux(n - 1, n * acc); // última operación
+}
+
+int factorialTR(int n) {
+    return factorialAux(n, 1); // inicia el acumulador
+}
+```
+Clave:
+- factorialAux es **tail recursive**, porque la llamada recursiva es la última acción.
+
+- El **acumulador** (acc) lleva el resultado parcial, **evita operaciones pendientes** tras la llamada.
+
+#### 4.3 Optimización del compilador
+
+En teoría, un compilador puede optimizar cualquier función tail recursive, siempre que:
+1. La llamada recursiva sea la última operación que se ejecuta.
+2. No haya código pendiente después de la llamada.
+
+Ejemplo que no se optimiza:
+```cpp
+int f(int n) {
+    int x = n + 1;
+    return f(n-1) + x;
+    // NO tail recursive, porque hay que sumar x después
+}
+```
+- Aunque la llamada f(n-1) sea la última línea de código escrita, aún hay que sumar x después → no es tail recursion.
+- El compilador no puede reutilizar el stack frame.
+- **Para estar seguro de que se aprovecha, es recomendable usar la función auxiliar con acumulador y mantener la llamada recursiva como última operación.**
+
+#### 4.4 Ejemplo de clase
+
+Es útil ver el ejemplo (y tomarse el tiempo de entenderlo) de una función recursiva de cola de la secuencia fibonacci:
+
+```cpp
+/**
+ * secuencia fibonacci comienza con 0 y 1
+ * cada término siguiente se obtiene sumando los dos términos anteriores:
+ * [0, 1, 1, 2, 3, 5, 8, 13, 21, ...]
+ * */
+int fibonacciTail(int valor){
+    if (valor == 1 || valor == 2) return 1;
+    return fibaux (3, 1, 1, valor); // no hay op extra
+}
+
+/**
+ * @param y: termino inicial el cual va a ir incrementando hasta llegar a x (termino final)
+ * @param a1: acumulador de la secuencia, valor actual
+ * @param a2: acumulador de la secuencia, valor anterior
+ * @param x: termino de la secuencia al que se quiere llegar
+*/
+int fibaux(int y, int a1, int a2, int x){
+    if(y == x) return a1 + a2;
+    return fibaux(y+1, a1 + a2, a1, x); // no hay op extra
+}
+```
