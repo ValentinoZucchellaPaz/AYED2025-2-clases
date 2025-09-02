@@ -1,4 +1,6 @@
 /.idea/
 /cmake-build-debug/
-/.qodo/
-/.vscode/
+build/
+.vscode/
+.vscode/tasks.json
+.DS_Store
