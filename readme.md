@@ -46,7 +46,15 @@ Estas son mis notas de estudio personal, cualquier diferencia con lo que digan l
     9. [Unions y Enums](#39-unions-y-enums)
     10. [Programación genérica](#310-programación-genérica)
 4. [Recursión](#4-recursión)
-    1. 
+    1. [Tail Recursion](#41-tail-recursion)
+    2. [Función auxiliar para tail recursion](#42-función-auxiliar-para-tail-recursion)
+    3. [Optimización del compilador](#43-optimización-del-compilador)
+    4. [Ejemplo Fibonacci](#44-fibonacci-tail-recursion)
+    5. [Ejemplo Torre de Hanoi](#45-torre-de-hanoi)
+    6. [Ejemplo N-Reinas (Backtracking)](#46-backtracking-y-n-reinas)
+5. [Estructuras de Datos](#5-estructuras-de-datos)
+    1. [Listas Enlazadas](#51-lista-enlazada-linked-list)
+    2. [Vectores](#52-vector-array-dinámico)
 
 ---
 
@@ -993,8 +1001,6 @@ La programación genérica permite escribir código independiente del tipo de da
 
 Esto se logra mediante el uso de plantillas, modelos de clases o funciones que pueden aceptar uno o más tipos de datos como parámetros.
 
-**Aunque útil e interesante como concepto de programación, fue poco mencionado en el curso asi que no lo tomen como un tema eje de la materia**
-
 ```cpp
 template <typename T>
 T sumar(T a, T b) {
@@ -1017,6 +1023,8 @@ template <typename T> (o template <class T>) significa:
 "Esta función/clase depende de un tipo genérico T".
 
 Al compilar, se genera código específico para cada tipo usado → instanciación de plantilla.
+
+Esto es importante ya que el compilador genera código concreto para cada tipo (duplicando el código), no es como en Java o C# donde se usa un tipo genérico en tiempo de ejecución.
 
 #### Ejemplo con todos los casos y aplicaciones
 ```cpp
@@ -1083,7 +1091,7 @@ int main() {
 
 ```
 
-### 4. Recursión
+## 4. Recursión
 
 
 La recursión es una técnica en programación donde una función se llama a sí misma para resolver un problema dividiéndolo en subproblemas más pequeños.
@@ -1103,7 +1111,7 @@ Algunos ejemplos donde se ve y aplica recursión son:
 - Fórmulas matemáticas: factorial o secuencia Fibonacci.
 - **Estructuras de Datos**: manipulación de arrays, arboles y grafos.
 
-#### 4.1 Tail Recursion
+### 4.1 Tail Recursion
 En programación, cada vez que se llama a una función, el sistema agrega un **stack frame**(bloque) al **stack**. Este bloque contiene información como:
 - Valor de retorno
 - Dirección de la siguiente instrucción
@@ -1112,9 +1120,11 @@ En programación, cada vez que se llama a una función, el sistema agrega un **s
 
 En una recursión normal, cada llamada recursiva agrega un nuevo stack frame. Si la recursión es profunda, esto puede **llenar el stack** y provocar un **stack overflow**.
 
-La **recursión de cola** (tail recursion) es un tipo especial de recursión donde **la llamada recursiva es la última operación que hace la función**, es decir, no hay nada pendiente después de la llamada. Esto permite que el compilador pueda optimizar la recursión, reutilizando el mismo stack frame para cada llamada, en lugar de crear uno nuevo.
+La **recursión de cola** (tail recursion) es un tipo especial de recursión donde **la llamada recursiva es la última operación que hace la función**, es decir, no hay nada pendiente después de la llamada. Esto permite que el compilador pueda optimizar la recursión, reutilizando el mismo stack frame para cada llamada, en lugar de crear uno nuevo. También se recomienda usar tail ya que es mas sencilla su conversión en iterativa (una funcion que usando un loop llegue al mismo resultado, sin usar mas de un stack frame).
 
-#### 4.2 Función auxiliar para tail recursion
+>> Cuidado: No se garantiza que todos los compiladores implementen esta. Y solo los que lo permiten lo harán cuando se cumpla la condición. Incluso en esos casos, no se puede garantizar esta optimización cuando haya destructores no triviales, objetos temporarios u otros efectos secundarios.
+
+### 4.2 Función auxiliar para tail recursion
 
 Muchas veces se usa una función auxiliar para transformar una recursión normal en tail recursion, porque necesitamos llevar un acumulador o un estado que se vaya actualizando en cada llamada:
 
@@ -1134,17 +1144,26 @@ int factorialAux(int n, int acc) {
 int factorialTR(int n) {
     return factorialAux(n, 1); // inicia el acumulador
 }
+
+// si no se desea usar una funcion auxiliar, se lo puede inicilizar en el llamado de la funcion o poniendo un valor de default a esta:
+factorialAux(n, 1);
+int factorialTR2(int n, int acc = 1) {
+    if (n == 0) return acc;
+    return factorialTR2(n - 1, n * acc); // última operación
+}
 ```
 Clave:
 - factorialAux es **tail recursive**, porque la llamada recursiva es la última acción.
 
 - El **acumulador** (acc) lleva el resultado parcial, **evita operaciones pendientes** tras la llamada.
 
-#### 4.3 Optimización del compilador
+### 4.3 Optimización del compilador
 
 En teoría, un compilador puede optimizar cualquier función tail recursive, siempre que:
 1. La llamada recursiva sea la última operación que se ejecuta.
 2. No haya código pendiente después de la llamada.
+
+>> Además es importante resaltar que incluso sea ese el caso, efectos secundarios, destructores no triviales u objetos temporarios pueden impedir la optimización.
 
 Ejemplo que no se optimiza:
 ```cpp
@@ -1158,7 +1177,7 @@ int f(int n) {
 - El compilador no puede reutilizar el stack frame.
 - **Para estar seguro de que se aprovecha, es recomendable usar la función auxiliar con acumulador y mantener la llamada recursiva como última operación.**
 
-#### 4.4 Ejemplo de clase
+### 4.4 Fibonacci tail recursion
 
 Es útil ver el ejemplo (y tomarse el tiempo de entenderlo) de una función recursiva de cola de la secuencia fibonacci:
 
@@ -1183,4 +1202,308 @@ int fibaux(int y, int a1, int a2, int x){
     if(y == x) return a1 + a2;
     return fibaux(y+1, a1 + a2, a1, x); // no hay op extra
 }
+```
+
+### 4.5 Torre de Hanoi
+La Torre de Hanoi es un clásico problema de recursión que consiste en mover una serie de discos de diferentes tamaños desde una varilla origen a una varilla destino, utilizando una varilla auxiliar, siguiendo estas reglas:
+1. Solo se puede mover un disco a la vez.
+2. Un disco solo puede colocarse sobre otro disco más grande o en una varilla vacía.
+
+El objetivo es mover todos los discos de la varilla origen a la varilla destino, respetando las reglas mencionadas.
+
+#### ¿Cómo se resuelve recursivamente?
+La solución recursiva se basa en descomponer el problema en subproblemas más pequeños:
+1. Mover los n-1 discos superiores de la varilla origen a la varilla auxiliar, usando la varilla destino como auxiliar.
+2. Mover el disco más grande (el n-ésimo) de la varilla origen a la varilla destino.
+3. Mover los n-1 discos desde la varilla auxiliar a la varilla destino, usando la varilla origen como auxiliar.
+
+```cpp
+void hanoi(int n, char origen, char destino, char auxiliar) { // numero de discos y nombres de varillas
+    // Caso base: solo un disco
+    if (n == 1) {
+        cout << "Mover disco 1 de " << origen << " a " << destino << endl;
+        return;
+    }
+
+    // Paso 1: mover N-1 discos al auxiliar
+    // Notar que uso el auxiliar como destino temporal
+    hanoi(n - 1, origen, auxiliar, destino);
+
+    // Paso 2: mover el disco grande al destino
+    cout << "Mover disco " << n << " de " << origen << " a " << destino << endl;
+
+    // Paso 3: mover los N-1 discos del auxiliar al destino
+    // Notar que uso el origen como auxiliar temporal
+    hanoi(n - 1, auxiliar, destino, origen);
+}
+```
+
+Es útil tomarse el tiempo de leer detenidamente el código y entender cómo se descompone el problema en subproblemas más pequeños ya que es bastante declarativo en este caso.
+
+### 4.6 Backtracking y N Reinas
+#### ¿Qué es Backtracking?
+El backtracking es una técnica algorítmica utilizada para resolver problemas de toma de decisiones, combinatoria y búsqueda.
+Consiste en construir soluciones de manera incremental, explorando todas las posibilidades y retrocediendo (backtrack) cuando se detecta que una solución parcial no puede llevar a una solución completa válida, entonces se comienza del paso anterior usando otra opcion. Al final se exploran todas las opciones posibles, dando con la solucion (si es que existe).
+- Construir una solución paso a paso
+- Si en algún punto violas una condición, retrocedes (backtrack) y pruebas otra opción.
+- Se sigue hasta encontrar una solución válida o recorrer todas las posibilidades.
+
+#### N Reinas
+El problema de las N reinas consiste en colocar N reinas en un tablero de ajedrez de NxN de manera que ninguna reina pueda atacar a otra.
+La solucion de este problema usando backtracking consiste de los siguientes pasos:
+1. Colocar una reina en la primera fila.
+2. En la siguiente fila, intentar poner otra reina en una columna donde no ataque a las anteriores.
+3. Si no hay lugar válido → retroceder a la fila anterior y mover la reina.
+4. Repetir hasta llenar todas las filas con reinas válidas.
+
+> Aunque existen soluciones más eficientes, escribiré la más simple para comprender a fondo el problema.
+
+**Modelando el problema**
+- Usamos tablero como vector<int> de tamaño N.
+- Convención: tablero[fila] = col indica en qué columna pusimos la reina de esa fila.
+- Colocamos una reina por fila, de arriba hacia abajo (fila = 0..N-1).
+Por eso, al chequear la fila f, solo existen reinas en filas 0..f-1.
+- Función `esSeguro(fila, col)` para verificar si es seguro poner una reina en (fila, col).
+
+La funcion es seguro debe chequear: las columnas y diagonales (ya que por el plantamiento del problema, no hay que chequear filas).
+Para los columnas solo debo iterar sobre las filas anteriores y ver si alguna tiene la misma columna.
+Para las diagonales me debo fijar que la pendiente entre el punto que quiero probar y las otras reinas no sea 1 o -1 (pendiente positiva o negativa respectivamente), entonces uso |m|!=1 ó |colConReina - colAProbear| != |filaConReina - filaAProbar|.
+
+```cpp
+// Función para verificar si una reina puede estar en (fila, col)
+bool esSeguro(int tablero[], int fila, int col) {
+    for (int i = 0; i < fila; i++) {
+        int colReina = tablero[i];
+        if (colReina == col) return false; // misma columna
+        if (abs(colReina - col) == abs(i - fila)) return false; // misma diagonal
+    }
+    return true;
+}
+
+// Backtracking para ubicar reinas
+void resolver(int tablero[], int fila, int N = 8) {
+    if (fila == N) { 
+        // Encontramos una solución: imprimir
+        imprimirSolucion(tablero, N);
+        return;
+    }
+
+    // Donde sucede la magia del backtracking
+    for (int col = 0; col < N; col++) {
+        if (esSeguro(tablero, fila, col)) {
+            tablero[fila] = col;  // Colocar reina
+            resolver(tablero, fila + 1, N); // Recursión
+        }
+        // al volver (si es que no encontramos solución por ese camino),
+        // probamos siguiente columna (backtracking implícito)
+    }
+}
+```
+
+
+## 5. Estructuras de Datos
+Las estructuras de datos son formas específicas de organizar y almacenar datos en una computadora para que puedan ser accedidos y modificados de manera eficiente.
+Se eligen según las necesidades del problema, considerando factores como:
+- Tipo de operaciones (inserción, eliminación, búsqueda).
+- Frecuencia de esas operaciones.
+- Uso de memoria.
+
+
+### 5.1 Lista Enlazada (Linked List)
+Una lista enlazada es una estructura de datos que consiste en nodos, donde cada nodo contiene un valor y un puntero al siguiente nodo en la lista.
+- Permite inserciones y eliminaciones eficientes en cualquier posición.
+- No requiere un bloque contiguo de memoria, lo que facilita la gestión dinámica de memoria.
+- Puede ser simple (unidireccional) o doblemente enlazada (con punteros al nodo anterior y siguiente) o también circular.
+- No permite acceso aleatorio eficiente (hay que recorrer desde el inicio).
+
+#### Ejemplo completo
+
+Ya existen implementación nativas de listas en C++ (una [circular](https://cplusplus.com/reference/list/list/) y una [simple](https://cplusplus.com/reference/forward_list/forward_list/)).
+
+En este caso se hace la implementación desde 0 a modo de comprender mejor estas estructuras de datos: implementación básica de una lista enlazada simple con métodos para insertar al inicio y al final, eliminar un nodo, mostrar la lista, obtener el tamaño y verificar si está vacía.
+
+Tiene como agregado que se hizo con metodos recursivos, lo cual es un buen ejercicio para entender recursión y listas enlazadas a la vez.
+
+Otro agregado es que se hizo genérica, pudiendo almacenar cualquier tipo de dato. Conviene leer sobre [programación genérica](#310-programación-genérica) si no se entiende.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+// Un nodo tiene valor y un puntero al siguiente nodo, el cual comienza como nullptr
+template<typename T>
+struct Nodo {
+    T dato;             
+    Nodo* siguiente;    
+
+    Nodo(T valor) : dato(valor), siguiente(nullptr) {}
+};
+
+// La lista tiene un puntero al primer nodo (cabeza), solo eso
+template<typename T>
+class Lista {
+private:
+    Nodo<T>* cabeza;    
+
+    // --- Funciones recursivas privadas ---
+    // luego en public llamo como funciones auxiliares, encapsulando la recursión
+    
+    void insertarFinalRec(Nodo<T>* nodo, T valor) {
+        // caso base: nodo es el último
+        if (!nodo->siguiente) {
+            nodo->siguiente = new Nodo<T>(valor);
+            return;
+        }
+        insertarFinalRec(nodo->siguiente, valor); // recursión de cola
+    }
+
+    void mostrarRec(Nodo<T>* nodo) {
+        if (!nodo) {
+            cout << "NULL" << endl;
+            return;
+        }
+        cout << nodo->dato << " -> ";
+        mostrarRec(nodo->siguiente);
+    }
+
+    void eliminarRec(Nodo<T>* nodo, T valor) {
+        // solo elimina nodos posteriores, la cabeza se maneja en public
+        if (!nodo || !nodo->siguiente) return;
+        if (nodo->siguiente->dato == valor) {
+            Nodo<T>* aBorrar = nodo->siguiente;
+            nodo->siguiente = nodo->siguiente->siguiente;
+            delete aBorrar;
+            return; // detener recursión tras borrar
+        }
+
+        eliminarRec(nodo->siguiente, valor); // recursión de cola
+    }
+
+    // Devuelve tamaño de la lista recursivamente
+    int tamanioRec(Nodo<T>* nodo) {
+        if (!nodo) return 0; // caso base: lista vacía
+        return 1 + tamanioRec(nodo->siguiente); // recursión
+    }
+
+    // Liberar memoria recursivamente
+    void destruirRec(Nodo<T>* nodo) {
+        if (!nodo) return;
+        destruirRec(nodo->siguiente);
+        delete nodo;
+    }
+
+public:
+    Lista() : cabeza(nullptr) {} // constructor vacío
+    Lista(Nodo<T>* nodo) : cabeza(nodo) {}  // constructor con nodo inicial (puede tener otros enlazados)
+
+    // Métodos públicos que llaman a los recursivos
+
+    void insertarInicio(T valor) { // unico no recursivo, O(1)
+        Nodo<T>* nuevo = new Nodo<T>(valor);
+        nuevo->siguiente = cabeza;
+        cabeza = nuevo;
+    }
+
+    void insertarFinal(T valor) {
+        // Caso especial: lista vacía
+        if (!cabeza) {
+            cabeza = new Nodo<T>(valor);
+            return;
+        }
+        insertarFinalRec(cabeza, valor);
+    }
+
+    void eliminar(T valor) {
+        if (!cabeza) return;
+
+        // Caso especial: eliminar la cabeza
+        if (cabeza->dato == valor) {
+            Nodo<T>* temp = cabeza;
+            cabeza = cabeza->siguiente;
+            delete temp;
+            return;
+        }
+
+        // Caso general: delegamos en recursión
+        eliminarRec(cabeza, valor);
+    }
+
+    void mostrar() {
+        mostrarRec(cabeza);
+    }
+
+    T getCabeza() {
+        if (!cabeza) throw runtime_error("Lista vacía");
+        return cabeza->dato;
+    }
+
+    bool esVacio() {
+        return !cabeza;
+    }
+
+    int tamanio() {
+        return tamanioRec(cabeza);
+    }
+
+    ~Lista() {
+        destruirRec(cabeza);
+    }
+};
+
+int main() {
+    Lista<int> listaInt;
+    listaInt.insertarInicio(2);
+    listaInt.insertarInicio(1);
+    listaInt.insertarFinal(3);
+    listaInt.insertarFinal(4);
+    listaInt.mostrar(); // 1 -> 2 -> 3 -> 4 -> NULL
+
+    Lista<string> listaStr;
+    listaStr.insertarFinal("hola");
+    listaStr.insertarFinal("mundo");
+    listaStr.insertarInicio("inicio");
+    listaStr.mostrar(); // inicio -> hola -> mundo -> NULL
+}
+
+```
+
+### 5.2 Vector (Array Dinámico)
+
+- Un vector es un arreglo dinámico que puede cambiar de tamaño durante la ejecución (redimencion cuando se agregan/sacan elementos).
+- Forma parte de la STL (#include <vector>).
+- Guarda los elementos de forma contigua en memoria, a diferencia de las listas enlazadas, que usan nodos dispersos.
+- Rápido acceso y modificación (como un array estatico).
+- Puedo insertar/eliminar elementos en posiciones intermedias, aunque esto es costoso ya que puede requerir mover elementos.
+
+Tiene soporte para tipos genéricos, aunque tiene una implementación especial para booleanos.
+
+```cpp
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int main() {
+    vector<int> v = {1, 2, 3};
+    vector<string> vStr = {"Hola", " ", "mundo"};
+
+    // Agregar elementos
+    v.push_back(4);          // agrega al final
+    v.insert(v.begin() + 1, 5);  // inserta 5 en la posición 1
+
+    // Eliminar elementos
+    v.pop_back();            // elimina el último
+    v.erase(v.begin() + 1);  // elimina el elemento en la posición 1
+
+    // Acceso
+    cout << v[0] << endl;    // acceso directo
+    cout << v.at(1) << endl; // acceso con chequeo de rango
+
+    // Información
+    cout << "Tamaño: " << v.size() << endl;
+    cout << "Capacidad: " << v.capacity() << endl;
+
+    // Iterar
+    for (int x : v) cout << x << " ";
+}
+
 ```
